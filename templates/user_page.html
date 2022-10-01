@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>컨트롤보드</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
+        * {
+            font-family: 'Gowun Dodum', sans-serif;
+        }
+        .con {
+            text-align: center;;
+        }
+    </style>
+</head>
+<body>
+    <div class="con">
+        <h1>
+            This is userpage
+        </h1>
+        <div class="info">
+            <div>
+                hello! your id is {{user_id}}
+            </div>
+            <div>
+                content input here
+            </div>
+        </div>
+    </div>
+    <script>
+        $document.ready(function() {
+            if ("{{session['id']}}" == "") {
+                alert("올바르지 않은 접속경로입니다");
+                location.href = "/login";
+            }
+        });
+    </script>
+</body>
+</html>

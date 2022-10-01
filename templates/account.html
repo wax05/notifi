@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>계정만들기</title>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
+        * {
+            font-family: 'Gowun Dodum', sans-serif;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .title {
+            text-align: center;
+            font-family: 'Gowun Dodum', sans-serif;
+        }
+    </style>
+    <script>
+        var PassWordInput = document.getElementById('pw_input');
+        var PassWordCheck = document.getElementById('pw_check');
+
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="input_container">
+            <h1 class="title">계정생성</h1>
+            <form method="post" action="">
+                <label for="ID">
+                    이름 입력
+                    <input type="text" class="input"  name="name" placeholder="이름을 입력해 주세요" required>
+                </label>
+                <label for="ID">
+                    아이디 입력
+                    <input type="text" class="input"  name="id" placeholder="ID를 입력해주세요" required>
+                </label>
+                <label for="ID">
+                    비밀번호 입력
+                    <input type="password" id="pw_input" class="input"  name="pw" placeholder="비밀번호를 입력해주세요" required>
+                </label>
+                <label for="ID">
+                    비밀번호 확인
+                    <input type="password" id="pw_check" class="input"  name="pw" placeholder="비밀번호를 다시 입력해주세요" required>
+                </label>
+                <label for="ID">
+                    이메일 입력 (인증을 위해 필요합니다)
+                    <input type="email" class="input"  name="code" placeholder="" required>
+                </label>
+                <label for="ID">
+                    코드 입력
+                    <input type="text" class="input"  name="code" placeholder="" required>
+                </label>
+                <input type="submit" id="submit" value="확인">
+            </form>
+        </div>
+        <div class="img_tag"></div>
+    </div>
+</body>
+</html>

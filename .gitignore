@@ -1,0 +1,4 @@
+.vscode/
+__pycache__/
+sql/work
+test.py
