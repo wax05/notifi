@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>로그인페이지</title>
+  <!--cdn import-->
   <script src="https://code.jquery.com/jquery-latest.min.js"></script>
-  <link rel="stylesheet" href="https:cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+  <script src="https://kit.fontawesome.com/4f26a61ef8.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
   <style>
     body {
       background-color: #9f9da7;
@@ -173,7 +175,7 @@
              var id_ture = data.id_ture;
              console.log(login);
              if (login == true) {
-               location.replace('/userpage');
+               location.replace('/user');
              } if (login == false) {
                if (id_ture == true) {
                 alert('비밀번호가 맞지않습니다');

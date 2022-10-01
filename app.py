@@ -187,7 +187,7 @@ def post():
 def admin_page():
     return render_template('admin.html')
 
-@app.route('/userpage', methods=['GET','POST'])#유저페이지
+@app.route('/user', methods=['GET','POST'])#유저페이지
 def userpage():
     if request.method == 'POST':
         return 0
@@ -197,4 +197,13 @@ def userpage():
         else:
             return redirect('/login')
 
+@app.route('/user/notifi', methods=['GET','POST'])#유저공지페이지
+def user_notifi():
+    if request.method == 'POST':
+        return 0
+    else:
+        if 'id' in session:
+            return render_template('user_notifi.html')
+        else:
+            return redirect('/login')
 

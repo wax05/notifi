@@ -5,7 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>컨트롤보드</title>
+    <!--cdn import-->
     <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://kit.fontawesome.com/4f26a61ef8.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
         * {
@@ -17,7 +20,7 @@
     </style>
 </head>
 <body>
-    <div class="con">
+    <div class="container">
         <h1>
             This is userpage
         </h1>
@@ -26,17 +29,12 @@
                 hello! your id is {{user_id}}
             </div>
             <div>
-                content input here
+                <a class="link_btn" href="/user/notifi">공지페이지</a>
+                <a class="link_btn" href="/user/setting">유저설정</a>
             </div>
         </div>
     </div>
     <script>
-        $document.ready(function() {
-            if ("{{session['id']}}" == "") {
-                alert("올바르지 않은 접속경로입니다");
-                location.href = "/login";
-            }
-        });
     </script>
 </body>
 </html>

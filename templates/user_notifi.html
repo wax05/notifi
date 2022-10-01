@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유저공지</title>
+    <!--cdn import-->
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://kit.fontawesome.com/4f26a61ef8.js" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
+        * {
+            font-family: 'Gowun Dodum', sans-serif;
+            padding: 0;
+            margin: 0;
+        }
+        body {
+            background-color: #0093E9;
+            background-image: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%);
+        }
+        .container {
+            position: relative;
+            top: 50%;
+            left: 10%;
+            margin-top: 5%;
+            border: 1px solid black;
+            border-radius: 10px;
+            height: 750px;
+            width: 1500px;
+            padding-bottom: 3%;
+            background-color: whitesmoke;
+        }
+        .title {
+            position: relative;
+            left: 1%;
+            margin: 1%;
+            font-size: 30px;
+        }
+        .input_content {
+            margin-left: 2%;
+            margin-right: 2%;
+            width: 60%;
+            height: 5%;
+        }
+        #input_title {
+            padding-left: 1%;
+        }
+        #input_content {
+            width: 93%;
+            height: 60%;
+            margin-bottom: 1%;
+            font-size: 15px;
+            padding: 1%;
+        }
+        #submit {
+            margin-left: 2%;
+            width: 15%;
+            height: 100px;
+        }
+        .confirm {
+            position: relative;
+            left: 20%;
+        }
+        .confirm_con {
+            position: relative;
+            width: auto;
+            left: 80.3%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">제목</div>
+        <input type="text" class="input_content"placeholder="공지를 입력해주세요" id="input_title">
+        <div class="title" id="sub_title">상세내용</div>
+        <textarea class="input_content"placeholder="공지 세부사항을 입력해주세요" id="input_content" style="word-wrap:break-word"></textarea>
+        <div class="confirm_con">
+            <input type="button" value="Submit" id="submit">
+        </div>
+    </div>
+    <script>
+        $("#submit").click(function() {
+            var title = $('#input_title').val();
+            var sub_content = $('#input_content').val();
+            var waring = '글자 자리수 제한을 지켜주세요'
+            if (title.length <= 30) {
+                if (sub_content.length <= 150) {
+                    var postdata = {
+                        'title':title, 'password':sub_content
+                    }
+                    consoel.log(postdata);
+                    $.ajax({
+                        type: 'POST',
+                        url: '/user/notifi',
+                        data: JSON.stringify(postdata),
+                        dataType : 'JSON',
+                        contentType: "application/json",
+                    success: function(data){
+                        res = data.bool;
+                        if (res = true) {
+                            alert('전송이 완료되었습니다');
+                        } else {
+                            alert('에러가 발생했습니다')
+                        }
+                    },
+                    error: function(request, status, error){
+                        alert('에러가 발생했습니다')
+                    }
+                    })
+                } else {
+                    alert(waring)
+                }
+            } else {
+                alert(waring)
+            }
+        });
+    </script>
+</body>
+</html>
