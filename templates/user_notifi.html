@@ -80,6 +80,18 @@
         </div>
     </div>
     <script>
+        function check_session(){
+            if ("{{session['id']}}" == undefined) {
+                location.replace("/login");
+            } else {
+                console.log("check")
+            }
+        };
+
+        $(document).ready(function() {
+        setInterval(check_session(),60000);
+        });
+        
         $("#submit").click(function() {
             var title = $('#input_title').val();
             var sub_content = $('#input_content').val();

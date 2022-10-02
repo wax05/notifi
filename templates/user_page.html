@@ -36,16 +36,25 @@
         </div>
     </div>
     <script>
+        function check_session(){
+            if ("{{session['id']}}" == undefined) {
+                location.replace("/login");
+            } else {
+                console.log("check")
+            }
+        };
+
         $(document).ready(function() {
             console.log("{{session['id']}}")
+            setInterval(check_session(),60000);
         });
 
         $("#user_notifi_btn").click(function() {
-            location.replace('/user/notifi')
+            location.href = "/user/notifi";
         });
 
         $("#user_setting_btn").click(function() {
-            location.replace('/user/setting')
+            location.href = "/user/setting";
         });
     </script>
 </body>

@@ -82,5 +82,17 @@
             </div>
         </div>
     </div>
+    <script>
+    function check_session(){
+      if ("{{session['id']}}" == 'admin') {
+        location.replace("/login");
+      } else {
+        console.log("check")
+      }
+    };
+    $(document).ready(function() {
+      setInterval(check_session(),60000);
+    });
+    </script>
 </body>
 </html>
