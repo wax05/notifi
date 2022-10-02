@@ -53,9 +53,6 @@
             margin-top: 20px;
         }
     </style>
-    <script>
-        $.post( "/PostTest", { name: "John", time: "2pm" } );
-    </script>
 </head>
 <body>
     <div class="container">
@@ -82,5 +79,19 @@
             </div>
         </div>
     </div>
+    <script>
+        function check_session() {
+            if ("{{session[id]}}" == 'admin') {
+                location.replace('/login');
+            } else {
+                console.log('session_check');
+            }
+        }
+
+        $(document).ready(function() {
+            console.log("{{session['id']}}");
+            setInterval(check_session(),60000);
+        });
+    </script>
 </body>
 </html>

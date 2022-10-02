@@ -71,6 +71,7 @@
 </head>
 <body>
     <div class="container">
+        <input type="button" value="mainpage" id="mainpage">
         <div class="title">제목</div>
         <input type="text" class="input_content"placeholder="공지를 입력해주세요" id="input_title">
         <div class="title" id="sub_title">상세내용</div>
@@ -80,6 +81,23 @@
         </div>
     </div>
     <script>
+        function check_session() {
+            if ("{{session[id]}}" == undefined) {
+                location.replace('/login');
+            } else {
+                console.log('session_check');
+            }
+        }
+
+        $(document).ready(function() {
+            console.log("{{session['id']}}");
+            setInterval(check_session(),60000);
+        });
+
+        $("#mainpage").click(function(){
+            location.href = '/user'
+        });
+
         $("#submit").click(function() {
             var title = $('#input_title').val();
             var sub_content = $('#input_content').val();
@@ -89,7 +107,7 @@
                     var postdata = {
                         'title':title, 'password':sub_content
                     }
-                    consoel.log(postdata);
+                    console.log(postdata);
                     $.ajax({
                         type: 'POST',
                         url: '/user/notifi',
