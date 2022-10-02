@@ -133,7 +133,7 @@ app = Flask(__name__)
 
 app.secret_key = secret_key
 
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=1)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
 
 @app.route('/')#main page
 def main():
@@ -207,3 +207,12 @@ def user_notifi():
         else:
             return redirect('/login')
 
+@app.route('/user/setting', methods=['GET','POST'])#유저세팅페이지
+def user_setting():
+    if request.method == 'POST':
+        return 0
+    else:
+        if 'id' in session:
+            return 'user_setting_page'
+        else:
+            return redirect('/login')
