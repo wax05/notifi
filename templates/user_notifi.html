@@ -24,6 +24,7 @@
             top: 50%;
             left: 10%;
             margin-top: 5%;
+            margin-bottom: 1.8%;
             border: 1px solid black;
             border-radius: 10px;
             height: 750px;
@@ -55,51 +56,62 @@
         }
         #submit {
             margin-left: 2%;
-            width: 15%;
+            width: 100%;
             height: 100px;
         }
         .confirm {
+            width: auto;
             position: relative;
             left: 20%;
         }
         .confirm_con {
             position: relative;
-            width: auto;
+            width: 16.5%;
             left: 80.3%;
         }
+
+        #upload_time {
+            margin-top: -30px;
+            margin-bottom: -30px;
+            position: relative;
+            left: 78.3%;
+            width: 21%;
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
         <div class="title">제목</div>
         <input type="text" class="input_content"placeholder="공지를 입력해주세요" id="input_title">
-        <div class="title" id="sub_title">상세내용</div>
+        <input type="checkbox" id="check_box" onclick="check(event)"><label for="check_box">ㅤ예약업로드</label>
+        <p id="upload_time" style="display: none;">
+        업로드 시간ㅤ<input type ="datetime-local" class="time" id="time">
+        </p>
+            <div class="title" id="sub_title">상세내용</div>
         <textarea class="input_content"placeholder="공지 세부사항을 입력해주세요" id="input_content" style="word-wrap:break-word"></textarea>
         <div class="confirm_con">
             <input type="button" value="Submit" id="submit">
         </div>
     </div>
     <script>
-        function check_session(){
-            if ("{{session['id']}}" == undefined) {
-                location.replace("/login");
+        function check(event) {
+            var date = $("#upload_time");
+            if (event.target.checked) {
+                $("#upload_time").show();
+                $("#sub_title").css("margin-top", "49px");
             } else {
-                console.log("check")
+                $("#upload_time").hide();
+                $("#sub_title").css("margin-top", "15px");
             }
-        };
+        }
 
-        setInterval(check_session(),60000);
-
-        $("#submit").click(function() {
-            var title = $('#input_title').val();
-            var sub_content = $('#input_content').val();
-            var waring = '글자 자리수 제한을 지켜주세요'
-            if (title.length <= 30) {
-                if (sub_content.length <= 150) {
-                    var postdata = {
-                        'title':title, 'password':sub_content
+        function now_upload(title,sub_content,upload_id) {
+            if (title.length <= 30) {//제목 30자 판별
+                if (sub_content.length <= 300) {//내용 300자 판별
+                    var postdata = {//data
+                        'res':false,'title':title, 'content':sub_content, 'id':upload_id
                     }
-                    consoel.log(postdata);
                     $.ajax({
                         type: 'POST',
                         url: '/user/notifi',
@@ -107,23 +119,72 @@
                         dataType : 'JSON',
                         contentType: "application/json",
                     success: function(data){
-                        res = data.bool;
+                        res = data.res;
+                        console.log(res);
                         if (res = true) {
                             alert('전송이 완료되었습니다');
                         } else {
-                            alert('에러가 발생했습니다')
+                            alert('에러가 발생했습니다');
                         }
                     },
                     error: function(request, status, error){
-                        alert('에러가 발생했습니다')
+                        alert('에러가 발생했습니다');
                     }
                     })
                 } else {
-                    alert(waring)
+                    alert('글자수가 너무 많습니다');
                 }
             } else {
-                alert(waring)
+                alert('글자수가 너무 많습니다');
             }
+        };
+        
+        function date_upload(title,sub_content,upload_id,upload_time) {
+            if (title.length <= 30) {
+                if (sub_content.length <= 300) {
+                    var postdata = {
+                        'res':true, 'title':title, 'content':sub_content, 'id':upload_id, 'time':upload_time
+                    }
+                    console.log(postdata);
+                    $.ajax({
+                        type: 'POST',
+                        url: '/user/notifi',
+                        data: JSON.stringify(postdata),
+                        dataType : 'JSON',
+                        contentType: "application/json",
+                    success: function(data){
+                        res = data.res;
+                        console.log(res);
+                        if (res = true) {
+                            alert('전송이 완료되었습니다');
+                        } else {
+                            alert('에러가 발생했습니다');
+                        }
+                    },
+                    error: function(request, status, error){
+                        alert('에러가 발생했습니다');
+                    }
+                    })
+                } else {
+                    alert('글자수가 너무 많습니다');
+                }
+            } else {
+                alert('글자수가 너무 많습니다');
+            }
+        };
+
+        $("#submit").click(function() {
+            var title = $('#input_title').val();
+            var sub_content = $('#input_content').val();
+            var upload_id = "{{session['id']}}";
+            var upload_time = $("#time")
+            if ($("#upload_time").css("display") != true) {
+                console.log(upload_time.value);
+                date_upload(title,sub_content,upload_id,upload_time);
+            } else {//바로 업로드
+                console.log(upload_time.value);
+                now_upload(title,sub_content,upload_id);
+            };
         });
     </script>
 </body>

@@ -146,10 +146,9 @@ def login():
         user_id = input_data['id']#데이터 파싱
         user_pw = input_data['password']
         login_TF = check_password(user_id,user_pw)#체크
-        print(login_TF)
+        print('Login\n\'ip\':{},\'id\': {}'.format(request.remote_addr,user_id))#로그인로그
         if login_TF == True:
             session['id'] = user_id
-            print(session['id'])
             return jsonify(login = True , id = True)
         elif login_TF == False:
             return jsonify(login = False, id = True)
@@ -177,9 +176,8 @@ def create_account():
 @app.route('/PostTest', methods=['GET','POST'])#post 테스트용
 def post():
     if request.method == 'POST':
-        req = request.form['text']
-        print(req)
-        return f'Hello, Post!\n{req}'
+        print(request.form['time'])
+        return f'Hello, Post!'
     else:
         return render_template('test.html')
 
@@ -200,7 +198,12 @@ def userpage():
 @app.route('/user/notifi', methods=['GET','POST'])#유저공지페이지
 def user_notifi():
     if request.method == 'POST':
-        return 0
+        input_json = request.get_json()#ajax input json data
+        input_title = input_json['title']
+        input_content = input_json['content']
+        user_id = input_json['id']
+        print(input_title,input_content,user_id)
+        return jsonify(res = True)
     else:
         if 'id' in session:
             return render_template('user_notifi.html')

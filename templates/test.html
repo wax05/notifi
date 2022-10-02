@@ -12,8 +12,14 @@
     <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
 </head>
 <body>
-    {%if session['id'] %}
-    <p>your id is {{session['id']}}</p>
-    {% endif %}
+    <input type ="datetime-local" name="time" class="time" id="time">
+    <input type ="submit" id="btn">
+    <script>
+        $("#time").click(function() {
+            var x = document.getElementById("time").value;
+            console.log(x);
+            alert(x);
+        });   
+    </script>
 </body>
 </html>
