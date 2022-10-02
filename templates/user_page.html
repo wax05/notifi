@@ -31,13 +31,22 @@
             <div>
                 <a class="link_btn" href="/user/notifi">공지페이지</a>
                 <a class="link_btn" href="/user/setting">유저설정</a>
-                <input type="button" value="user_notifi_btn" class ="btn">
+                <input type="button" id="user_notifi_btn"value="user_notifi_btn" class ="btn">
+                <input type="button" id="user_setting_btn"value="user_setting_btn" class ="btn">
             </div>
         </div>
     </div>
     <script>
         $(document).ready(function() {
             console.log("{{session['id']}}")
+        });
+
+        $("#user_notifi_btn").click(function() {
+            location.replace('/user/notifi')
+        });
+
+        $("#user_setting_btn").click(function() {
+            location.replace('/user/setting')
         });
     </script>
 </body>
