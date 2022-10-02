@@ -46,7 +46,7 @@
     #login-form-wrap {
       background-color: #fff;
       width: 35%;
-      margin: 30px auto;
+      margin: 10% auto;
       text-align: center;
       padding: 20px 0 0 0;
       border-radius: 4px;
@@ -82,6 +82,7 @@
       position: relative;
       display: inline-block;
       background: none;
+      width: 80%;
     }
 
     .validation {
@@ -109,19 +110,12 @@
       display: inline-block;
       cursor: pointer;
       text-align: center;
+      width: 80%;
     }
     input[type="submit"]:hover {
       background-color: #329dd5;
       -webkit-transition: all 0.2s ease;
       transition: all 0.2s ease;
-    }
-
-    input{
-      width: 500px;
-    }
-
-    #password, #user_id {
-      width: 500px;
     }
 
     #create-account-wrap {
@@ -140,10 +134,10 @@
   <div id="login-form-wrap">
     <h2>Login</h2>
       <p>
-      <input type="text" id="user_id" name="user_id" placeholder="Username" required><i class="validation"><span></span><span></span></i>
+      <input type="text" id="user_id" name="user_id" class="user_input"placeholder="Username" required><i class="validation"><span></span><span></span></i>
       </p>
       <p>
-      <input type="password" id="password" name="password" placeholder="Password" required><i class="validation"><span></span><span></span></i>
+      <input type="password" id="password" name="password" class="user_input"placeholder="Password" required><i class="validation"><span></span><span></span></i>
       </p>
       <p id="login_false">
 
@@ -157,37 +151,58 @@
   </div><!--login-form-wrap-->
   <!-- partial -->
   <script>
-     $('#login').click(function(){
-       var id = $('#user_id').val();
-       var password = $('#password').val();
-       var postdata = {
-           'id':id, 'password':password
-       }
-       $.ajax({
-           type: 'POST',
-           url: '/login',
-           data: JSON.stringify(postdata),
-           dataType : 'JSON',
-           contentType: "application/json",
-           success: function(data){
-             var login = data.login;
-             var id_ture = data.id_ture;
-             console.log(login);
-             if (login == true) {
-               location.replace('/user');
-             } if (login == false) {
-               if (id_ture == true) {
-                alert('비밀번호가 맞지않습니다');
-               } else{
-                alert("아이디가 맞지 않습니다")
-               }
-             }
-           },
-           error: function(request, status, error){
-             alert('에러가 발생했습니다')
-           }
-       })
-   })
+    //id, pw string
+    function login(id,pw) { //ajax post
+      var postdata = {
+          'id':id, 'password':pw
+      }
+      $.ajax({
+          type: 'POST',
+          url: '/login',
+          data: JSON.stringify(postdata),
+          dataType : 'JSON',
+          contentType: "application/json",
+          success: function(data){
+            var login = data.login;
+            var id_ture = data.id_ture;
+            console.log(login);
+            if (login == true) {
+              location.replace('/user');
+            } if (login == false) {
+              if (id_ture == true) {
+              alert('비밀번호가 맞지않습니다');
+              } else{
+              alert("아이디가 맞지 않습니다")
+              }
+            }
+          },
+          error: function(request, status, error){
+            alert('에러가 발생했습니다')
+          }
+      });
+    };
+
+    function get_user_data() {
+      var id = $('#user_id').val();
+      var password = $('#password').val();
+      var postdata = {
+          'id':id, 'password':password
+      }
+      return postdata;
+    };
+
+    $(".user_input").keydown(function(e) {
+            if (e.keyCode == 13) {
+              var return_data = get_user_data();
+              login(return_data.id,return_data.password);
+            }
+        });
+
+    //로그인 버튼 누를때
+    $('#login').click(function(){
+      var return_data = get_user_data();
+      login(return_data.id,return_data.password);
+    });
   </script>
 </body>
 </html>
