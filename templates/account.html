@@ -65,18 +65,26 @@
             var email = $("#email").val();
             var code = $("#code").val();
             if (pw == pw_check) {
-                //ajax here
+                postdata = {//send data to server
+                    'name':name,
+                    'id':id,
+                    'pw':pw,
+                    'email':email,
+                    'code':code
+                }
+                $.ajax({
+                    type: "POST",
+                    url: "/account",
+                    data: JSON.stringify(postdata),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function(data) {
+                        var success = data
+                    },
+                });
             } else {
                 var pw = $("#pw_input").val('');
                 var pw_check = $("#pw_check").val('');
-            }
-            postdata = {
-                'name':name,
-                'id':id,
-                'pw':pw,
-                'pwcheck':pw_check,
-                'email':email,
-                'code':code
             }
             console.log(postdata);
         });

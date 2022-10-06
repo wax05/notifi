@@ -24,8 +24,8 @@ conn = pymysql.connect(host = host, user = user, password = pw ,db = db_name,cha
 
 curs = conn.cursor()#일반커서
 curs1 = conn.cursor(pymysql.cursors.DictCursor)#딕셔너리 커서
-def Db_Export_Data(TableName):
-    """ Args:\n\t`TableName` : `string`\nReturn:\n\t`Type` : `Typle`"""
+def Db_Export_Data(TableName:str)->tuple:
+    """`TableName`에 있는 정보 다 빼옴"""
     try:
         sql = f"select * from {TableName}"
         curs.execute(sql)
@@ -34,8 +34,8 @@ def Db_Export_Data(TableName):
     except:
         return 'error'
 
-def Db_Export_Data_YouWant(TableName,Column,Value):
-    """ Args:\n\t`TableName` : `string`\n\t`Column` : `string`\n\t`Value` : `string`\nReturn:\n\t`Type` : `Typle(List)`"""
+def Db_Export_Data_YouWant(TableName:str,Column:str,Value:str)->tuple:
+    """`TableName`테이블내 `Column`에서 `Value`와 맞는것을 모두 가져옴"""
     try:
         sql = f"select * from {TableName} where {Column}='{Value}'"
         curs.execute(sql)
@@ -44,8 +44,8 @@ def Db_Export_Data_YouWant(TableName,Column,Value):
     except:
         return 'error'
 
-def Db_Export_Data_DICT(TableName):
-    """ Args:\n\t`TableName` : `string`\n\t`Column` : `string`\n\t`Value` : `string`\nReturn:\n\t`Type` : `List(Dict)`"""
+def Db_Export_Data_DICT(TableName:str)->dict:
+    """`TableName`내에서 있는 정보를 모두 Dict형태로 가져옴"""
     try:
         sql = f"select * from {TableName}"
         curs1.execute(sql)
@@ -54,8 +54,9 @@ def Db_Export_Data_DICT(TableName):
     except:
         return 'error'
 
-def Db_Export_Data_YouWant_DICT(TableName,Column,Value,key_name,key_val):
-    """ Args:\n\t`TableName` : `string`\n\t`Column` : `string`\n\t`Value` : `string`\n\t`key_name` : `string`\n\t`key_val` : `string`\nReturn:\n\t`Type` : `List(in(Dict))`"""
+def Db_Export_Data_YouWant_DICT(TableName:str,Column:str,Value:str,key_name:str,key_val:str)->dict:
+    """`TableName`테이블내 `Column`에서 `Value`와 맞는것을 모두 Dict형태로 가져옴
+    \n가져온 값을 `key_val`에 맞는 값을 `result`딕셔너리에 `key_name`으로 담아서 딕셔너리 리턴 """
     try:
         sql = f"select * from {TableName} where {Column}='{Value}'"
         curs1.execute(sql)
@@ -68,35 +69,49 @@ def Db_Export_Data_YouWant_DICT(TableName,Column,Value,key_name,key_val):
     except:
         return 'error'
 
-def Db_Input_UserData(UserName,UserId,PwHash,Class_,Permision):
-    """ Args:\n\t`UserName` : `string`\n\t`UserId` : `string`\n\t`PwHash` : `string`\n\t`Class_` : `string`\n\t`Permision` : `string`\nReturn:\n\t `none`\n\t db-user_data 데이터 추가"""
-    input_data = """insert into user_data(user_name, user_id, pw_hash, class, permision, admin) values(%s,%s,%s,%s,%s)"""
-    curs.execute(input_data, (f'{UserName}',f'{UserId}',f'{PwHash}',f'{Class_}',f'{Permision}'))
-    conn.commit()
-    return 'done'
+def Db_Input_UserData(UserName:str,UserId:str,PwHash:str,Class_:str,Permision:str,)->str:
+    """`UserName`,`UserId`,`PwHash`,`Class_`,`Permision`
+    \n\t db-user_data 데이터 추가"""
+    try:
+        input_data = """insert into user_data(user_name, user_id, pw_hash, class, permision,auto_login) values(%s,%s,%s,%s,%s,0)"""
+        curs.execute(input_data, (f'{UserName}',f'{UserId}',f'{PwHash}',f'{Class_}',f'{Permision}'))
+        conn.commit()
+        return 'done'
+    except:
+        return 'error'
 
-def Delete_Data(TableName,Column,Value):
-    """Args:\n\t`TableName` : `string`\n\t`Column` : `string`\n\t`Value` : `string`\nReturn:\n\t`none``"""
-    sql = 'delete from {} where {} = {}'.format(TableName,Column,Value)
-    curs.execute(sql)
-    conn.commit()
-    return 'done'
+def Delete_Data(TableName:str,Column:str,Value:str)->str:
+    """`TableName`내에있는 `Column`에서 `Value`인 값만 삭제하는 함수"""
+    try:
+        sql = 'delete from {} where {} = {}'.format(TableName,Column,Value)
+        curs.execute(sql)
+        conn.commit()
+        return 'done'
+    except:
+        return 'error'
 
-def MakeAdminAccount(username, password):
-    """어드민용 계정 생성\n\nArgs:\n\t`username` : `string`\n\t`password` : `string`\nReturn\n\t`type` : `dict`"""
-    pw_hash = pw_to_hash(password)
-    Db_Input_UserData(username, username, pw_hash, 'admin', 'admin')
-    return_dict = {'id':username, 'password':password}
-    return return_dict
+def MakeAdminAccount(username:str, password:str)->dict:
+    """어드민용 계정 생성"""
+    try:
+        pw_hash = pw_to_hash(password)
+        Db_Input_UserData(username, username, pw_hash, 'admin', 'admin')
+        return_dict = {'id':username, 'password':password}
+        return return_dict
+    except:
+        return 'error'
 
 def DeleteUserAccount(userid):
-    """userid를 이용해 데이터를 삭제\n\nArgs:\n\t`userid` : `string`\nReturn:\n\t`return` : `none`"""
-    Delete_Data('user_data','user_id',f'{userid}')
-    return 'done'
+    """userid를 이용해 데이터를 삭제"""
+    try:
+        Delete_Data('user_data','user_id',f'{userid}')
+        return 'done'
+    except:
+        return 'error'
 
 
-def check_password(id,password):
-    """Args:\n\t`userid` , `password` : `String`\nReturn:\n\t`type` : `boolean`"""
+def check_password(id:str,password:str)->bool:
+    """`id`와`password`의 해쉬를 이용해 db에서 유저 정보를 체크하는 함수\n
+    에러나면 `str`타입으로 에러라고 반환함"""
     try:
         export = Db_Export_Data_YouWant('user_data','user_id',id)
         for i in export:
@@ -110,33 +125,68 @@ def check_password(id,password):
         return 'error'
         
 
-def url_gen ():#url 만들어줌
-    """`return` : `string`\n`len` : `10`"""
-    url = secrets.token_urlsafe(10)
+def url_gen(len:int)->str:
+    """url `len` 자리만들어줌"""
+    url = secrets.token_urlsafe(len)
     return url
 
-def password_gen():#16진수 무작위수로 15자리 비밀번호 리턴
-    """16진수로 15자리 비밀번호 리턴\n`return` : `string`\n`len` : `15`"""
-    pw = secrets.token_hex(15)
+def password_gen(len:int)->str:
+    """16진수 무작위수로 `len` 자리 비밀번호 리턴"""
+    pw = secrets.token_hex(len)
     return pw
 
-def pw_to_hash(input_pw):#password를 64자리 해쉬로 변환
-    """ Args:\n\t`input_pw` : `string`\nReturn:\n\t`Type` : `string`\n\t`len` : `64`"""
+def pw_to_hash(input_pw:str)->str:
+    """`input_pw`를 64자리 해쉬로 변환"""
     password = str(input_pw)
     password_input = password.encode()
     m= sha256(password_input)
     return m.hexdigest()
 
-def logging (userid,title,content):
-    """Args:\n\t`userid` :String\n\t`title` : String\n\t`content` : String\n Return : `boolean`"""
+def logging (userid:str,title:str,content:str)->bool:
+    """유저가 공지 등록하면 sql에 로그 써주는 함수"""
     try:
         input_data = """insert into log(user_id, notifi_title, notifi_content, upload_time) values(%s,%s,%s,NOW())"""
         curs.execute(input_data, (f'{userid}',f'{title}',f'{content}'))
         conn.commit()
         return True
     except:
-        return 'error'    
+        return 'error'
 
+def make_code(len: int) -> str:
+    try:
+        return secrets.token_urlsafe(len)
+    except:
+        return 'error'
+
+def code_check(code:str)->bool:
+    code_output = Db_Export_Data_YouWant('code','code',code)
+    if code_output == 'error':
+        return 'error'
+    else:
+        for i in code_output:
+            used = i[1]
+        if used == 0:
+            return True
+        elif used == 1:
+            return False
+        else:
+            print(f'DB Code Table, Column code Value {code}')
+            return 'error'
+
+def email(userid:str,email:str)->bool:
+    try:
+        input_data = """insert into user_email(user_id, user_email) values(%s,%s)"""
+        curs.execute(input_data, (f'{userid}',f'{email}'))
+        conn.commit()
+        return True
+    except:
+        return 'error'
+
+def email_confim(userid:str)->bool:
+    edit_data = """UPDATE user_email SET confirm=%s, confirm_date=NOW() WHERE user_id=%s"""
+    curs.execute(edit_data, (1,userid))
+    conn.commit()
+    return True
 #----------------------------------------------------------------function end
 #----------------------------------------------------------------flask
 app = Flask(__name__)
@@ -175,9 +225,13 @@ def logout():
 @app.route('/account', methods=['GET','POST'])#계정생성
 def account():
     if request.method == 'POST':
-        id = request.form['user_id']
-        pw = request.form['pw']
-        print(id,pw)
+        input_data = request.get_json()#ajax로 들어온 데이터
+        code = input_data['code']
+        if code_check(code) == True:
+            name = input_data['name']
+            id = input_data['id']
+            pw = pw_to_hash(input_data['password'])
+
     else:
         return render_template('account.html')
 
@@ -234,6 +288,7 @@ def user_setting():
             return 'user_setting_page'
         else:
             return redirect('/login')
+
 @app.errorhandler(404)
 def error_404(error):
     return render_template('error.html'), 404
