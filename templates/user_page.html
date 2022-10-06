@@ -21,6 +21,7 @@
 </head>
 <body>
     <div class="container">
+        <input type="button" id="logout" value="logout" class ="btn">
         <h1>
             This is userpage
         </h1>
@@ -48,6 +49,10 @@
 
         $("#user_setting_btn").click(function() {
             location.href = "/user/setting";
+        });
+
+        $("#logout").click(function() {
+            location.href = "/logout";
         });
     </script>
 </body>

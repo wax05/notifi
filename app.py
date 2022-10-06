@@ -127,6 +127,16 @@ def pw_to_hash(input_pw):#password를 64자리 해쉬로 변환
     m= sha256(password_input)
     return m.hexdigest()
 
+def logging (userid,title,content):
+    """Args:\n\t`userid` :String\n\t`title` : String\n\t`content` : String\n Return : `boolean`"""
+    try:
+        input_data = """insert into log(user_id, notifi_title, notifi_content, upload_time) values(%s,%s,%s,NOW())"""
+        curs.execute(input_data, (f'{userid}',f'{title}',f'{content}'))
+        conn.commit()
+        return True
+    except:
+        return 'error'    
+
 #----------------------------------------------------------------function end
 #----------------------------------------------------------------flask
 app = Flask(__name__)
@@ -156,6 +166,11 @@ def login():
             return jsonify(login = False, id = False)
     else:
         return render_template('login.html')
+
+@app.route('/logout')#logout\
+def logout():
+    session.pop('id', None)
+    return redirect('/')
 
 @app.route('/account', methods=['GET','POST'])#계정생성
 def account():
@@ -219,3 +234,6 @@ def user_setting():
             return 'user_setting_page'
         else:
             return redirect('/login')
+@app.errorhandler(404)
+def error_404(error):
+    return render_template('error.html'), 404
