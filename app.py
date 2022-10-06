@@ -230,7 +230,13 @@ def account():
         if code_check(code) == True:
             name = input_data['name']
             id = input_data['id']
-            pw = pw_to_hash(input_data['password'])
+            pw = pw_to_hash(input_data['pw'])
+            input_email = input_data['email']
+            Db_Input_UserData(name,id,pw,'user','user')
+            email(id,input_email)
+            return jsonify(sta=True)
+        else:
+            return jsonify(sta=False)
 
     else:
         return render_template('account.html')
