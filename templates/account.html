@@ -27,35 +27,59 @@
     <div class="container">
         <div class="input_container">
             <h1 class="title">계정생성</h1>
-            <form method="post" action="">
-                <label for="ID">
-                    이름 입력
-                    <input type="text" class="input"  name="name" placeholder="이름을 입력해 주세요" required>
-                </label>
-                <label for="ID">
-                    아이디 입력
-                    <input type="text" class="input"  name="id" placeholder="ID를 입력해주세요" required>
-                </label>
-                <label for="ID">
-                    비밀번호 입력
-                    <input type="password" id="pw_input" class="input"  name="pw" placeholder="비밀번호를 입력해주세요" required>
-                </label>
-                <label for="ID">
-                    비밀번호 확인
-                    <input type="password" id="pw_check" class="input"  name="pw" placeholder="비밀번호를 다시 입력해주세요" required>
-                </label>
-                <label for="ID">
-                    이메일 입력 (인증을 위해 필요합니다)
-                    <input type="email" class="input"  name="code" placeholder="" required>
-                </label>
-                <label for="ID">
-                    코드 입력
-                    <input type="text" class="input"  name="code" placeholder="" required>
-                </label>
-                <input type="submit" id="submit" value="확인">
-            </form>
+            <label for="ID">
+                이름 입력
+                <input type="text" class="input"  name="name" id="user_name"placeholder="이름을 입력해 주세요" required>
+            </label>
+            <label for="ID">
+                아이디 입력
+                <input type="text" class="input"  name="id" id="user_id"placeholder="ID를 입력해주세요" required>
+            </label>
+            <label for="ID">
+                비밀번호 입력
+                <input type="password" id="pw_input" class="input"  name="pw"placeholder="비밀번호를 입력해주세요" required>
+            </label>
+            <label for="ID">
+                비밀번호 확인
+                <input type="password" id="pw_check" class="input"  name="pw"placeholder="비밀번호를 다시 입력해주세요" required>
+            </label>
+            <label for="ID">
+                이메일 입력 (인증을 위해 필요합니다)
+                <input type="email" class="input"  name="code" id="email"placeholder="user_email" required>
+            </label>
+            <label for="ID">
+                코드 입력
+                <input type="text" class="input"  name="code" id="code"placeholder="code" required>
+            </label>
+            <input type="submit" id="submit" value="확인">
         </div>
         <div class="img_tag"></div>
     </div>
+
+    <script>
+        $("#submit").click(function(){
+            var name = $("#user_name").val();
+            var id = $("#user_id").val();
+            var pw = $("#pw_input").val();
+            var pw_check = $("#pw_check").val();
+            var email = $("#email").val();
+            var code = $("#code").val();
+            if (pw == pw_check) {
+                //ajax here
+            } else {
+                var pw = $("#pw_input").val('');
+                var pw_check = $("#pw_check").val('');
+            }
+            postdata = {
+                'name':name,
+                'id':id,
+                'pw':pw,
+                'pwcheck':pw_check,
+                'email':email,
+                'code':code
+            }
+            console.log(postdata);
+        });
+    </script>
 </body>
 </html>
