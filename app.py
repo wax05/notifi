@@ -1,8 +1,10 @@
 #----------------------------------------------------------------module importa
 from datetime import timedelta
 import json
+from xmlrpc.client import Boolean
 import pymysql
 import secrets
+import random
 from hashlib import sha256
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
 from markupsafe import escape
@@ -19,6 +21,14 @@ charset=setting['charset']
 with open('config/flask_key.json') as f:
     setting = json.load(f)
 secret_key = setting['key']
+#----------------------------------------------------------------values make
+def group_user(input:str)->list:
+    """user_id를 다 뱉어줌"""
+    output = []
+    for i in input.split("/"):
+        if i != "":
+            output.append(str(i))
+    return output
 #----------------------------------------------------------------sql
 conn = pymysql.connect(host = host, user = user, password = pw ,db = db_name,charset = charset)#db기본설정
 
@@ -54,7 +64,17 @@ def Db_Export_Data_DICT(TableName:str)->dict:
     except:
         return 'error'
 
-def Db_Export_Data_YouWant_DICT(TableName:str,Column:str,Value:str,key_name:str,key_val:str)->dict:
+def Db_Export_Data_YouWant_DICT(TableName:str,Column:str,Value:str)->tuple:
+    """`TableName`테이블내 `Column`에서 `Value`와 맞는것을 모두 Dict형태로 가져옴"""
+    try:
+        sql = f"select * from {TableName} where {Column}='{Value}'"
+        curs1.execute(sql)
+        rows = curs1.fetchall()
+        return rows
+    except:
+        return 'error'
+
+def Db_Export_Data_YouWant_DICT_indict(TableName:str,Column:str,Value:str,key_name:str,key_val:str)->dict:
     """`TableName`테이블내 `Column`에서 `Value`와 맞는것을 모두 Dict형태로 가져옴
     \n가져온 값을 `key_val`에 맞는 값을 `result`딕셔너리에 `key_name`으로 담아서 딕셔너리 리턴 """
     try:
@@ -124,7 +144,39 @@ def check_password(id:str,password:str)->bool:
     except:
         return 'error'
         
+def code_check(code:str)->bool:
+    """db에 있는 코드를 체크합니다 \n Boolean형식으로 뱉어줍니다"""
+    try:
+        code_output = Db_Export_Data_YouWant('code','code',code)
+        if code_output == 'error':
+            return 'error'
+        else:
+            used = ''
+            for i in code_output:
+                used = i[1]
+                limit = i[3]
+            if used - limit == 0:
+                return False
+            else:
+                return True
+    except:
+        return 'error'
+        
+def email(userid:str,email:str)->bool:
+    try:
+        input_data = """insert into user_email(user_id, user_email) values(%s,%s)"""
+        curs.execute(input_data, (f'{userid}',f'{email}'))
+        conn.commit()
+        return True
+    except:
+        return 'error'
 
+def email_confim(userid:str)->bool:
+    edit_data = """UPDATE user_email SET confirm=%s, confirm_date=NOW() WHERE user_id=%s"""
+    curs.execute(edit_data, (1,userid))
+    conn.commit()
+    return True
+#----------------------------------------------------------------sql end,secrets start
 def url_gen(len:int)->str:
     """url `len` 자리만들어줌"""
     url = secrets.token_urlsafe(len)
@@ -142,51 +194,59 @@ def pw_to_hash(input_pw:str)->str:
     m= sha256(password_input)
     return m.hexdigest()
 
-def logging (userid:str,title:str,content:str)->bool:
-    """유저가 공지 등록하면 sql에 로그 써주는 함수"""
+def make_code(in_len: int) -> str:
     try:
-        input_data = """insert into log(user_id, notifi_title, notifi_content, upload_time) values(%s,%s,%s,NOW())"""
-        curs.execute(input_data, (f'{userid}',f'{title}',f'{content}'))
-        conn.commit()
-        return True
+        result = ""
+        down_case = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+        upper_case = ["A", "B", "C", "D", "E", "F", "G", "H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
+        numbers = [0,1,2,3,4,5,6,7,8,9]
+        while len(result) <= in_len-1:
+            big = random.randint(0,2)
+            if big == 0:
+                res = down_case[random.randint(0,len(down_case)-1)]
+                result += res
+            elif big == 1:
+                res = upper_case[random.randint(0,len(upper_case)-1)]
+                result += res
+            else:
+                res = numbers[random.randint(0,len(numbers)-1)]
+                result += str(res)
+        return result
     except:
         return 'error'
 
-def make_code(len: int) -> str:
-    try:
-        return secrets.token_urlsafe(len)
-    except:
-        return 'error'
+def group_member_check(group_name:str)->str:
+    db_export = Db_Export_Data_YouWant_DICT('group','group_name',group_name)
+    admin = db_export['admin']
+    user = db_export['user']
+    admin_many = admin.count('/')
+    user_many = user.count('/')
 
-def code_check(code:str)->bool:
-    code_output = Db_Export_Data_YouWant('code','code',code)
-    if code_output == 'error':
-        return 'error'
+def user_parsing(group:str,type:bool)->list:
+    """`group`이름에서 있는 유저 정보 가져옴 \n `type`이 True이면 admin,아니면 일반user"""
+    res = []
+    if type == True:
+        data = Db_Export_Data_YouWant_DICT('user_group','group_name',group)
+        for i in data:
+            admin_user = i['admin']
+            for e in admin_user.split('/'):
+                if e != '':
+                    res.append(e)
+        return res
     else:
-        for i in code_output:
-            used = i[1]
-        if used == 0:
-            return True
-        elif used == 1:
-            return False
-        else:
-            print(f'DB Code Table, Column code Value {code}')
-            return 'error'
+        data = Db_Export_Data_YouWant_DICT('user_group','group_name',group)
+        for i in data:
+            common_user = i['user']
+            for e in common_user.split('/'):
+                if e != '':
+                    res.append(e)
+        return res
 
-def email(userid:str,email:str)->bool:
-    try:
-        input_data = """insert into user_email(user_id, user_email) values(%s,%s)"""
-        curs.execute(input_data, (f'{userid}',f'{email}'))
-        conn.commit()
-        return True
-    except:
-        return 'error'
+def many_group_member(group:str)->int:
+    admin = user_parsing(group,True)
+    user = user_parsing(group,False)
+    return len(admin) + len(user)
 
-def email_confim(userid:str)->bool:
-    edit_data = """UPDATE user_email SET confirm=%s, confirm_date=NOW() WHERE user_id=%s"""
-    curs.execute(edit_data, (1,userid))
-    conn.commit()
-    return True
 #----------------------------------------------------------------function end
 #----------------------------------------------------------------flask
 app = Flask(__name__)
@@ -240,6 +300,24 @@ def account():
 
     else:
         return render_template('account.html')
+
+@app.route('/invite/<invite_code>', methods=['GET','POST'])
+def group_code_invite(invite_code):
+    if request.method == 'POST':
+        return 0
+    else:
+        if code_check(invite_code) == True:
+            db_output = Db_Export_Data_YouWant_DICT('code','code',invite_code)
+            print(db_output)
+            for i in db_output:
+                user_id = i['user_id']
+            user_data_output = Db_Export_Data_YouWant_DICT('user_data','user_id',user_id)
+            print(user_data_output)
+            for i in user_data_output:
+                user_name = i['user_name']
+            return render_template('invite.html',invite_user = user_name)
+        else:
+            return render_template('error.html')
 
 @app.route('/admin/account/create', methods=['POST'])#어드민용 계정생성
 def create_account():
