@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{invite_user}}님의 초대</title>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
         * {
@@ -60,6 +61,20 @@
             margin-top: 20%;
             height: 30%;
             background-color: aqua;
+            background-clip: content-box;
+            border: 1px solid black;
+        }
+        .img_box {
+            width: 80px;
+            height: 80px;
+        }
+        .img_show {
+            margin: 7.25px;
+            width: 80px;
+            height: 80px;
+        }
+        .st {
+            margin-top: -65px;
         }
     </style>
 </head>
@@ -69,15 +84,23 @@
             {{school_name}}{{invite_user}}님의 초대<br class="br">
             수락하시겠습니까?
             <div class="status">
-                <div class="img">
-                    <img src="static/img/{{}}">
+                <div class="img_box" id="img_box">
+                    <img class="img_show" id="img" src="{{file_name}}">
                 </div>
-                {{}}
+                <p class="st">{{school_name1}}<br>{{group_count}}명의 그룹원</p>
             </div>
         </div>
         <div class="btn_box">
             <input type="button" class="btn" id="no" value="초대를 거절합니다"><input type="button" class="btn" id="yes" value="초대를 수락합니다">
         </div>
     </div>
+    <script>
+        $(document).ready(function() {
+            var img_box = $("#imb_box").css('width');
+            console.log(img_box);
+            // var img = $("#img").css(img_box);
+
+        });
+    </script>
 </body>
 </html>

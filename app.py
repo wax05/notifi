@@ -1,5 +1,6 @@
 #----------------------------------------------------------------module importa
 from datetime import timedelta
+from fileinput import filename
 import json
 from xmlrpc.client import Boolean
 import pymysql
@@ -242,7 +243,7 @@ def user_parsing(group:str,type:bool)->list:
                     res.append(e)
         return res
 
-def many_group_member(group:str)->int:
+def many_group_member(group:str)->int:#그룹 인원 체크
     admin = user_parsing(group,True)
     user = user_parsing(group,False)
     return len(admin) + len(user)
@@ -307,15 +308,26 @@ def group_code_invite(invite_code):
         return 0
     else:
         if code_check(invite_code) == True:
+            #---------------------------------------------------------------누가 초대했는지 확인(id)
             db_output = Db_Export_Data_YouWant_DICT('code','code',invite_code)
-            print(db_output)
             for i in db_output:
                 user_id = i['user_id']
+                school_code = i['group']#학교 코드
+            #---------------------------------------------------------------누가 초대했는지 확인(이름)
             user_data_output = Db_Export_Data_YouWant_DICT('user_data','user_id',user_id)
-            print(user_data_output)
             for i in user_data_output:
                 user_name = i['user_name']
-            return render_template('invite.html',invite_user = user_name)
+            #----------------------------------------------------------------school_name
+            school_db = Db_Export_Data_YouWant_DICT('user_group','group_name',school_code)
+            for i in school_db:
+                school_name = i['school_name']
+            #----------------------------------------------------------------group_member_check
+            group_many = many_group_member(school_code)
+            #----------------------------------------------------------------이미지
+            db_img = Db_Export_Data_YouWant_DICT('img','group_name',school_code)
+            for i in db_img:
+                img_file_name = i['img_file']
+            return render_template('invite.html',invite_user = user_name, school_name1 = school_name, group_count = group_many, file_name=img_file_name)
         else:
             return render_template('error.html')
 
