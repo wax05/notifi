@@ -1,8 +1,7 @@
 #----------------------------------------------------------------module importa
 from datetime import timedelta
-from fileinput import filename
 import json
-from xmlrpc.client import Boolean
+from django.shortcuts import render
 import pymysql
 import secrets
 import random
@@ -177,6 +176,21 @@ def email_confim(userid:str)->bool:
     curs.execute(edit_data, (1,userid))
     conn.commit()
     return True
+
+def code_update(code:str)->bool:
+    edit_data = """UPDATE code SET used=%s WHERE code=%s"""
+    data = Db_Export_Data_YouWant_DICT('code','code',code)
+    for i in data:
+        used = i['used']
+        lim = i['limit']
+    if used != lim:
+        used += 1
+        curs.execute(edit_data, (used, code))
+        conn.commit()
+        return True
+    else:
+        return False
+    
 #----------------------------------------------------------------sql end,secrets start
 def url_gen(len:int)->str:
     """url `len` 자리만들어줌"""
@@ -256,6 +270,9 @@ app.secret_key = secret_key
 
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
 
+def no_session():#세션없으면 돌려주는 함수 // 개발중
+    return render_template('nosession.html')
+
 @app.route('/')#main page
 def main():
     return render_template('mainpage.html')
@@ -295,10 +312,12 @@ def account():
             input_email = input_data['email']
             Db_Input_UserData(name,id,pw,'user','user')
             email(id,input_email)
-            return jsonify(sta=True)
+            if code_update(code) == True:
+                return jsonify(sta=True)
+            else:
+                return jsonify(sta=False)
         else:
             return jsonify(sta=False)
-
     else:
         return render_template('account.html')
 
@@ -307,29 +326,32 @@ def group_code_invite(invite_code):
     if request.method == 'POST':
         return 0
     else:
-        if code_check(invite_code) == True:
-            #---------------------------------------------------------------누가 초대했는지 확인(id)
-            db_output = Db_Export_Data_YouWant_DICT('code','code',invite_code)
-            for i in db_output:
-                user_id = i['user_id']
-                school_code = i['group']#학교 코드
-            #---------------------------------------------------------------누가 초대했는지 확인(이름)
-            user_data_output = Db_Export_Data_YouWant_DICT('user_data','user_id',user_id)
-            for i in user_data_output:
-                user_name = i['user_name']
-            #----------------------------------------------------------------school_name
-            school_db = Db_Export_Data_YouWant_DICT('user_group','group_name',school_code)
-            for i in school_db:
-                school_name = i['school_name']
-            #----------------------------------------------------------------group_member_check
-            group_many = many_group_member(school_code)
-            #----------------------------------------------------------------이미지
-            db_img = Db_Export_Data_YouWant_DICT('img','group_name',school_code)
-            for i in db_img:
-                img_file_name = i['img_file']
-            return render_template('invite.html',invite_user = user_name, school_name1 = school_name, group_count = group_many, file_name=img_file_name)
+        if 'id' in session:
+            if code_check(invite_code) == True:
+                #---------------------------------------------------------------누가 초대했는지 확인(id)
+                db_output = Db_Export_Data_YouWant_DICT('code','code',invite_code)
+                for i in db_output:
+                    user_id = i['user_id']
+                    school_code = i['group']#학교 코드
+                #---------------------------------------------------------------누가 초대했는지 확인(이름)
+                user_data_output = Db_Export_Data_YouWant_DICT('user_data','user_id',user_id)
+                for i in user_data_output:
+                    user_name = i['user_name']
+                #----------------------------------------------------------------school_name
+                school_db = Db_Export_Data_YouWant_DICT('user_group','group_name',school_code)
+                for i in school_db:
+                    school_name = i['school_name']
+                #----------------------------------------------------------------group_member_check
+                group_many = many_group_member(school_code)
+                #----------------------------------------------------------------이미지
+                db_img = Db_Export_Data_YouWant_DICT('img','group_name',school_code)
+                for i in db_img:
+                    img_file_name = i['img_file']
+                return render_template('invite.html',invite_user = user_name, school_name1 = school_name, group_count = group_many, file_name=img_file_name)
+            else:
+                return render_template('error.html')
         else:
-            return render_template('error.html')
+            return redirect('/login')
 
 @app.route('/admin/account/create', methods=['POST'])#어드민용 계정생성
 def create_account():
@@ -348,7 +370,10 @@ def post():
 
 @app.route('/admin')#admin_page
 def admin_page():
-    return render_template('admin.html')
+    if 'id' in session:
+        return render_template('admin.html')
+    else:
+        return redirect('/login')
 
 @app.route('/user', methods=['GET','POST'])#유저페이지
 def userpage():

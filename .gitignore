@@ -2,6 +2,7 @@
 __pycache__/
 sql/work
 test.py
+kakao.json
 #log
 *.log
 #img

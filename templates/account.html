@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -20,25 +20,6 @@
         .title {
             text-align: center;
             font-family: 'Gowun Dodum', sans-serif;
-        }
-
-        .status {
-            position: fixed;
-            text-align: center;
-            height: 12%;
-            width: 18%;
-            top: 42%;
-            left: 42%;
-            background: rgb(255,255,255);
-            background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(0,212,255,1) 100%);
-            padding-top: 1%;
-            border: 1px solid black;
-            border-radius: 15px;
-        }
-
-        .stauts_info {
-            margin: 5%;
-            color: black;
         }
     </style>
 </head>
@@ -72,12 +53,6 @@
             </label>
             <input type="submit" id="submit" value="확인">
         </div>
-        <div class="status" id="status_true_show" style="display: none;">
-            <p class="status_info">계정이 만들어졌습니다<br>몇초후 로그인페이지로 이동합니다.</p>
-        </div>
-        <div class="status" id="status_false_show" style="display: none;">
-            <p class="status_info">코드가 틀립니다<br>코드를 다시 확인해주세요.</p>
-        </div>
         <div class="img_tag"></div>
     </div>
 
@@ -98,27 +73,27 @@
                     'code':code
                 }
                 $.ajax({
-                    type: "POST",
-                    url: "/account",
+                    type: 'POST',
+                    url: '/account',
                     data: JSON.stringify(postdata),
-                    dataType: "JSON",
+                    dataType : 'JSON',
                     contentType: "application/json",
-                    success: function(data) {
-                        var sta = data.sta
-                        if (sta == true) {
-                            $("#status_true_show").css("display","block");
-                            setTimeout(() => {
-                                location.href = "/login"
-                            }, 5000);
+                    success: function(data){
+                        var res = data.sta;
+                        if (res == true) {
+                            alert('회원가입이 정상적으로 처리되었습니다')
+                            location.replace('/login');
                         } else {
-                            $("#status_false_show").css("display","block");
-                            var code = $("#code").val('');
+                            alert('코드가 틀렸습니다')
                         }
                     },
+                    error: function(request, status, error){
+                        alert('에러가 발생했습니다')
+                    }
                 });
             } else {
                 var pw = $("#pw_input").val('');
-                var pw_check = $("#pw_check").val('');
+                var pw_check = $("#pw_check").val('');//틀리면 값 null로 바꿈
             }
             console.log(postdata);
         });
