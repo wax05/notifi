@@ -9,6 +9,13 @@
     <script src="https://code.jquery.com/jquery-latest.min.js"></script>
     <script src="https://kit.fontawesome.com/4f26a61ef8.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+    <script>
+        if ("{{session['id']}}" == '') {
+                $("#all").css('display', 'none');
+                alert("로그인하세요");
+                location.replace("/login");
+            }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
         * {
@@ -20,7 +27,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="all">
         <input type="button" id="logout" value="logout" class ="btn">
         <h1>
             This is userpage
@@ -38,7 +45,6 @@
         </div>
     </div>
     <script>
-
         $(document).ready(function() {
             console.log("{{session['id']}}")
         });

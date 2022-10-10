@@ -1,13 +1,13 @@
 #----------------------------------------------------------------module importa
 from datetime import timedelta
 import json
-from django.shortcuts import render
 import pymysql
 import secrets
 import random
 from hashlib import sha256
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
 from markupsafe import escape
+
 #----------------------------------------------------------------function
 #----------------------------------------------------------------json_parser
 with open('config/key.json') as f:
@@ -21,6 +21,7 @@ charset=setting['charset']
 with open('config/flask_key.json') as f:
     setting = json.load(f)
 secret_key = setting['key']
+
 #----------------------------------------------------------------values make
 def group_user(input:str)->list:
     """user_id를 다 뱉어줌"""
@@ -239,23 +240,28 @@ def group_member_check(group_name:str)->str:
 
 def user_parsing(group:str,type:bool)->list:
     """`group`이름에서 있는 유저 정보 가져옴 \n `type`이 True이면 admin,아니면 일반user"""
-    res = []
-    if type == True:
-        data = Db_Export_Data_YouWant_DICT('user_group','group_name',group)
-        for i in data:
-            admin_user = i['admin']
-            for e in admin_user.split('/'):
-                if e != '':
-                    res.append(e)
-        return res
-    else:
-        data = Db_Export_Data_YouWant_DICT('user_group','group_name',group)
-        for i in data:
-            common_user = i['user']
-            for e in common_user.split('/'):
-                if e != '':
-                    res.append(e)
-        return res
+    try:
+        res = []
+        if type == True:
+            data = Db_Export_Data_YouWant_DICT('user_group','group_name',group)
+            for i in data:
+                admin_user = i['admin']
+                for e in admin_user.split('/'):
+                    if e != '':
+                        res.append(e)
+            return res
+        elif type == False:
+            data = Db_Export_Data_YouWant_DICT('user_group','group_name',group)
+            for i in data:
+                common_user = i['user']
+                for e in common_user.split('/'):
+                    if e != '':
+                        res.append(e)
+            return res
+        else:
+            print('type error: type is no boolean') 
+    except:
+        return 'error'
 
 def many_group_member(group:str)->int:#그룹 인원 체크
     admin = user_parsing(group,True)
@@ -284,7 +290,7 @@ def login():
         user_id = input_data['id']#데이터 파싱
         user_pw = input_data['password']
         login_TF = check_password(user_id,user_pw)#체크
-        print('Login\n\'ip\':{},\'id\': {}'.format(request.remote_addr,user_id))#로그인로그
+        print('Login\n\'ip\':{},\'id\': {},login={}'.format(request.remote_addr,user_id,login_TF))#로그인로그
         if login_TF == True:
             session['id'] = user_id
             return jsonify(login = True , id = True)
@@ -380,10 +386,7 @@ def userpage():
     if request.method == 'POST':
         return 0
     else:
-        if 'id' in session:
-            return render_template('user_page.html',user_id = session['id'])
-        else:
-            return redirect('/login')
+        return render_template('user_page.html')
 
 @app.route('/user/notifi', methods=['GET','POST'])#유저공지페이지
 def user_notifi():
@@ -405,10 +408,7 @@ def user_setting():
     if request.method == 'POST':
         return 0
     else:
-        if 'id' in session:
-            return 'user_setting_page'
-        else:
-            return redirect('/login')
+        return render_template('user_setting.html')
 
 @app.errorhandler(404)
 def error_404(error):
