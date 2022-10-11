@@ -172,16 +172,25 @@ def code_check(code:str)->bool:
     except:
         return 'error'
         
-def email(userid:str,email:str)->bool:
+def email(userid:str,email:str,code:str)->bool:
     try:
-        input_data = """insert into user_email(user_id, user_email) values(%s,%s)"""
-        curs.execute(input_data, (f'{userid}',f'{email}'))
+        input_data = """insert into user_email(user_id, user_email, code) values(%s,%s,%s)"""
+        curs.execute(input_data, (f'{userid}',f'{email}',f'{code}'))
         conn.commit()
         return True
     except:
         return 'error'
 
-def email_confim(userid:str)->bool:
+def email_code(user_id:str,code:str)->bool:
+    try:
+        edit_data = """UPDATE user_email SET code=%s WHERE user_id=%s"""
+        curs.execute(edit_data, (code, user_id))
+        conn.commit()
+        return True
+    except:
+        return False
+
+def email_confirm(userid:str)->bool:
     edit_data = """UPDATE user_email SET confirm=%s, confirm_date=NOW() WHERE user_id=%s"""
     curs.execute(edit_data, (1,userid))
     conn.commit()
@@ -286,7 +295,7 @@ def many_group_member(group:str)->int:#그룹 인원 체크
     user = user_parsing(group,False)
     return len(admin) + len(user)
 
-def send_check_email(email_to,code):
+def send_check_email(email_to:str,code:str)->bool:
     try:
         # smpt 서버와 연결
         gmail_smtp = "smtp.gmail.com"  #gmail smtp 주소
@@ -362,9 +371,12 @@ def account():
             id = input_data['id']
             pw = pw_to_hash(input_data['pw'])
             input_email = input_data['email']
-            Db_Input_UserData(name,id,pw,'user','user')
-            email(id,input_email)
             if code_update(code) == True:
+                code = make_code(5)
+                Db_Input_UserData(name,id,pw,'user','user')
+                email(id,input_email,code)
+                session['email'] = input_email
+                send_check_email(input_email,code)
                 return jsonify(sta=True)
             else:
                 return jsonify(sta=False)
@@ -372,6 +384,22 @@ def account():
             return jsonify(sta=False)
     else:
         return render_template('account.html')
+
+@app.route('/account/email', methods=['GET','POST'])#이메일 확인
+def email_check():
+    if request.method == 'POST':
+        db_exp_data = Db_Export_Data_YouWant_DICT('user_email','user_id',)
+        for i in db_exp_data:
+            user_id = i['user_id']
+            db_code = i['code']
+        input_data = request.get_json()#ajax로 들어온 데이터
+        user_code = input_data['code']
+        if db_code == user_code:
+            email_confirm(user_id)
+            session.pop('email', None)
+            return jsonify(res = True)
+    else:
+        return render_template('email.html')
 
 @app.route('/invite/<invite_code>', methods=['GET','POST'])
 def group_code_invite(invite_code):
@@ -415,8 +443,9 @@ def create_account():
 @app.route('/PostTest', methods=['GET','POST'])#post 테스트용
 def post():
     if request.method == 'POST':
-        print(request.form['time'])
-        return f'Hello, Post!'
+        input_data = request.get_json()
+        print(input_data)
+        return jsonify(sta = True)
     else:
         return render_template('test.html')
 
@@ -467,5 +496,5 @@ def error_404(error):
     return render_template('error_404.html'), 404
 
 @app.errorhandler(405)
-def error_405(error):
+def error(error):
     return render_template('error.html',error = error), 405

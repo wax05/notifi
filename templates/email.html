@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en"data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이메일인증</title>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+    <script>
+        if ("{{session['email']}}" == '') {
+            $("#all").css('display', 'none');
+            alert("정상적인 방법으로 접근해주세요");
+            location.replace("/account");
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>이메일인증</h1>
+        <div class="user_email">
+            이메일 ({{session['email']}}) 으로 인증코드를 보내드렸습니다
+        </div>
+        <input type="text" placeholder="인증코드를 넣어주세요" id="code">
+        <input type="button" value="확인" id="submit">
+        <script>
+            $("#submit").click(function(){
+            var code = $('#code').val();
+            if (code.length == 5) {
+                    var send_data = {
+                        "code" : code
+                    }
+                    $.ajax({
+                    type: 'POST',
+                    url: '/account/email',
+                    data: JSON.stringify(send_data),
+                    dataType : 'text',
+                    contentType: "application/json",
+                        success: function(data){
+                            var res = data.sta;
+                            if (res == true) {
+                                alert('이메일 인증이 완료되었습니다')
+                            } else {
+                                console.log(false);
+                            }
+                        },
+                        error: function(request, status, error){
+                            alert('에러가 발생했습니다')
+                        }
+                    });
+                } else {
+                    code = $('#code').val('');
+                    console.log('false');
+                    alert('코드는5자리입니다');
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>
