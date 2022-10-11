@@ -79,6 +79,13 @@
         }
 
     </style>
+    <script>
+        if ("{{session['id']}}" == '') {
+                $("#all").css('display', 'none');
+                alert("로그인하세요");
+                location.replace("/login");
+            }
+    </script>
 </head>
 <body>
     <div class="container">

@@ -1,9 +1,13 @@
 #----------------------------------------------------------------module importa
 from datetime import timedelta
+from distutils.log import error
 import json
 import pymysql
 import secrets
 import random
+import smtplib
+from email.mime.multipart import MIMEMultipart # 메일의 Data 영역의 메시지를 만드는 모듈 
+from email.mime.text import MIMEText # 메일의 본문 내용을 만드는 모듈
 from hashlib import sha256
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
 from markupsafe import escape
@@ -21,6 +25,11 @@ charset=setting['charset']
 with open('config/flask_key.json') as f:
     setting = json.load(f)
 secret_key = setting['key']
+
+with open('config/gmail_key.json') as f:
+    key = json.load(f)
+email_pw = key['key']
+email_mail = key['email']
 
 #----------------------------------------------------------------values make
 def group_user(input:str)->list:
@@ -192,6 +201,15 @@ def code_update(code:str)->bool:
     else:
         return False
     
+def notifi_log(userid:str,title:str,content:str)->bool:
+    """log적어주는 sql함수"""
+    try:
+        input_data = """insert into log(user_id, notifi_title, notifi_content, upload_time) values(%s,%s,%s,NOW())"""
+        curs.execute(input_data, (f'{userid}',f'{title}',f'{content}'))
+        conn.commit()
+        return True
+    except:
+        return False
 #----------------------------------------------------------------sql end,secrets start
 def url_gen(len:int)->str:
     """url `len` 자리만들어줌"""
@@ -267,6 +285,34 @@ def many_group_member(group:str)->int:#그룹 인원 체크
     admin = user_parsing(group,True)
     user = user_parsing(group,False)
     return len(admin) + len(user)
+
+def send_check_email(email_to,code):
+    try:
+        # smpt 서버와 연결
+        gmail_smtp = "smtp.gmail.com"  #gmail smtp 주소
+        gmail_port = 465  #gmail smtp 포트번호
+        smpt = smtplib.SMTP_SSL(gmail_smtp, gmail_port)
+        # 로그인
+        smpt.login(email_mail,email_pw)
+        # 메일 기본 정보 설정
+        msg = MIMEMultipart()
+        msg["Subject"] = "인증요청"
+        msg["From"] = "saesol-api"
+        msg["To"] = email_mail
+
+        # 메일 내용 쓰기
+        content = f"""<html><head></head><body><h1>인증코드는 {code} 입니다</h1><a href="wax05/email/notme">만약 당신이 요청한것이 아니라면 클릭해주세요</a></body></html>"""
+        common = '만약 이 인증을 요청하신적이 없으시면 위 버튼을 눌러주시기 바랍니다'
+        content_part = MIMEText(content, 'html')
+        common_part = MIMEText(common, 'plain')
+        msg.attach(content_part)
+        msg.attach(common_part)
+        # 메일 보내고 서버 끄기
+        smpt.sendmail(email_mail, email_to, msg.as_string())  
+        smpt.quit()
+        return True
+    except:
+        return False
 
 #----------------------------------------------------------------function end
 #----------------------------------------------------------------flask
@@ -395,13 +441,15 @@ def user_notifi():
         input_title = input_json['title']
         input_content = input_json['content']
         user_id = input_json['id']
-        print(input_title,input_content,user_id)
-        return jsonify(res = True)
-    else:
-        if 'id' in session:
-            return render_template('user_notifi.html')
+        if user_id == '':
+            return jsonify(res = False, why = 'login')
         else:
-            return redirect('/login')
+            return jsonify(res = True)
+    else:
+        # if 'id' in session:
+            return render_template('user_notifi.html')
+        # else:
+            # return redirect(url_for('login'))
 
 @app.route('/user/setting', methods=['GET','POST'])#유저세팅페이지
 def user_setting():
@@ -410,6 +458,14 @@ def user_setting():
     else:
         return render_template('user_setting.html')
 
+@app.route('/log/login', methods=['POST'])#로그인 로깅
+def login_log():
+    return 0
+
 @app.errorhandler(404)
 def error_404(error):
-    return render_template('error.html'), 404
+    return render_template('error_404.html'), 404
+
+@app.errorhandler(405)
+def error_405(error):
+    return render_template('error.html',error = error), 405
