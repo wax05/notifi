@@ -3,5 +3,6 @@
     "user" : "root" ,
     "password" : "0000",
     "db_name" : "saesol-api",
-    "charset" : "utf8"
+    "charset" : "utf8",
+    "port" : "3306"
 }

@@ -1,6 +1,5 @@
 #----------------------------------------------------------------module importa
 from datetime import timedelta
-from distutils.log import error
 import json
 import pymysql
 import secrets
@@ -10,11 +9,12 @@ from email.mime.multipart import MIMEMultipart # 메일의 Data 영역의 메시
 from email.mime.text import MIMEText # 메일의 본문 내용을 만드는 모듈
 from hashlib import sha256
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
+from flask_socketio import SocketIO
 from markupsafe import escape
-
+from module import *
 #----------------------------------------------------------------function
 #----------------------------------------------------------------json_parser
-with open('config/key.json') as f:
+with open('config/sql_key.json') as f:
     setting = json.load(f)
 host=setting['host']
 user=setting['user']
@@ -498,3 +498,9 @@ def error_404(error):
 @app.errorhandler(405)
 def error(error):
     return render_template('error.html',error = error), 405
+
+if __name__ == '__main__':
+      app.run(host='127.0.0.1', port=5000, debug=True)
+
+if __name__ == '__main__':
+    SocketIO.run(app, debug=True)
