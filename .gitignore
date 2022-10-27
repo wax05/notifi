@@ -6,6 +6,7 @@ t.py
 kakao.json
 gmail_key.json
 email_send.html
+key.json
 #log
 *.log
 #img

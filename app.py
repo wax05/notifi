@@ -8,10 +8,11 @@ import smtplib
 from email.mime.multipart import MIMEMultipart # 메일의 Data 영역의 메시지를 만드는 모듈 
 from email.mime.text import MIMEText # 메일의 본문 내용을 만드는 모듈
 from hashlib import sha256
+import requests
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
+from flask_cors import CORS
 from flask_socketio import SocketIO
 from markupsafe import escape
-from module import *
 #----------------------------------------------------------------function
 #----------------------------------------------------------------json_parser
 with open('config/sql_key.json') as f:
@@ -30,6 +31,10 @@ with open('config/gmail_key.json') as f:
     key = json.load(f)
 email_pw = key['key']
 email_mail = key['email']
+
+with open('config/key.json') as f:
+    json_file = json.load(f)
+api_key = f"KEY={json_file['api-key']}"
 
 #----------------------------------------------------------------values make
 def group_user(input:str)->list:
@@ -323,22 +328,93 @@ def send_check_email(email_to:str,code:str)->bool:
     except:
         return False
 
+#----------------------------------------------------------------gov api
+
+def get_geb_info(date:int)->dict:
+    url = f"https://open.neis.go.kr/hub/mealServiceDietInfo?{api_key}&Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7531374&MLSV_YMD={date}"
+    res = requests.get(url)
+    json_res = res.json()
+    data1 = json_res['mealServiceDietInfo']
+    data2 = data1[1]
+    data3 = data2['row']
+    data4 = data3[0]
+    data5 = data4['DDISH_NM'].split('<br/>')
+    return_list = []
+    for i in data5:
+        try:
+            start = i.index('(')
+            end = i.rindex(')')
+            cut_val = i[start:end+1]
+            menu = (i.rstrip(cut_val))
+            return_list.append(menu.strip())
+        except ValueError:
+            menu = (i)
+            return_list.append(menu.strip())
+    return return_list
+
+def get_school_info(school_name:str)->dict:
+    """
+    https://open.neis.go.kr/portal/data/service/selectServicePage.do?page=1&rows=10&sortColumn=&sortDirection=&infId=OPEN17020190531110010104913&infSeq=2
+    명세서 대로 값을 반환함
+    """
+    SCH_INFO_url = 'schoolInfo'
+    url = f"https://open.neis.go.kr/hub/{SCH_INFO_url}?{api_key}&Type=json&SCHUL_NM={school_name}"
+    res = requests.get(url)
+    json_res = res.json()
+    data1 = json_res['schoolInfo']
+    data2 = data1[1]
+    data3 = data2['row']
+    data3 = data3[0]
+    return data3
+
+def get_school_time(ATPT_OFCDC_SC_CODE:str,school_code:int,grade:int,class_:int,date:int):
+    url = f"https://open.neis.go.kr/hub/hisTimetable?{api_key}&Type=json&ATPT_OFCDC_SC_CODE={ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE={school_code}&GRADE={grade}&CLASS_NM={class_}&TI_FROM_YMD={date}&TI_TO_YMD={date}"
+    res = requests.get(url)
+    json_data = res.json()
+    data1 = json_data['hisTimetable']
+    data2 = data1[1]
+    data3 = data2['row']
+    return_list = []
+    for i in data3:
+        return_list.append(i['ITRT_CNTNT'])
+    return return_list
+
 #----------------------------------------------------------------function end
 #----------------------------------------------------------------flask
 app = Flask(__name__)
-
+CORS(app)
 app.secret_key = secret_key
 
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
 
-def no_session():#세션없으면 돌려주는 함수 // 개발중
-    return render_template('nosession.html')
-
-@app.route('/')#main page
+@app.route('/')
 def main():
+    return render_template('portfolio.html')
+
+@app.route('/api/docs')
+def docs_page():
+    return render_template('docs.html')
+
+@app.route('/api/geb/<date>')
+def geb_api(date:int):
+    data = get_geb_info(date)
+    return jsonify(data)
+    
+@app.route('/api/schinfo/<name>')
+def schoolinfo_api(name:str):
+    data = get_school_info(name)
+    return jsonify(data)
+
+@app.route('/api/time/<grade>/<class_>/<date>')
+def time_api(grade:int, class_:int, date:int):
+    data = get_school_time('J10',7531374,grade,class_,date)
+    return jsonify(data)
+
+@app.route('/notifi')#main page
+def notifi_main():
     return render_template('mainpage.html')
 
-@app.route('/login', methods=['GET', 'POST'])#login page
+@app.route('/notifi/login', methods=['GET', 'POST'])#login page
 def login():
     if request.method == 'POST':
         input_data = request.get_json()#ajax로 들어온 데이터
@@ -356,12 +432,12 @@ def login():
     else:
         return render_template('login.html')
 
-@app.route('/logout')#logout\
+@app.route('/notifi/logout')#logout\
 def logout():
     session.pop('id', None)
     return redirect('/')
 
-@app.route('/account', methods=['GET','POST'])#계정생성
+@app.route('/notifi/account', methods=['GET','POST'])#계정생성 !!개발중!!
 def account():
     if request.method == 'POST':
         input_data = request.get_json()#ajax로 들어온 데이터
@@ -385,7 +461,7 @@ def account():
     else:
         return render_template('account.html')
 
-@app.route('/account/email', methods=['GET','POST'])#이메일 확인
+@app.route('/notifi/account/email', methods=['GET','POST'])#이메일 확인
 def email_check():
     if request.method == 'POST':
         db_exp_data = Db_Export_Data_YouWant_DICT('user_email','user_id',)
@@ -401,7 +477,7 @@ def email_check():
     else:
         return render_template('email.html')
 
-@app.route('/invite/<invite_code>', methods=['GET','POST'])
+@app.route('/notifi/invite/<invite_code>', methods=['GET','POST'])
 def group_code_invite(invite_code):
     if request.method == 'POST':
         return 0
@@ -433,14 +509,14 @@ def group_code_invite(invite_code):
         else:
             return redirect('/login')
 
-@app.route('/admin/account/create', methods=['POST'])#어드민용 계정생성
+@app.route('/notifi/admin/account/create', methods=['POST'])#어드민용 계정생성
 def create_account():
     id = request.form['id']
     pw = request.form['pw']
     MakeAdminAccount(id, pw)
     return 'done'
 
-@app.route('/PostTest', methods=['GET','POST'])#post 테스트용
+@app.route('/notifi/PostTest', methods=['GET','POST'])#post 테스트용
 def post():
     if request.method == 'POST':
         input_data = request.get_json()
@@ -449,21 +525,21 @@ def post():
     else:
         return render_template('test.html')
 
-@app.route('/admin')#admin_page
+@app.route('/notifi/admin')#admin_page
 def admin_page():
     if 'id' in session:
         return render_template('admin.html')
     else:
         return redirect('/login')
 
-@app.route('/user', methods=['GET','POST'])#유저페이지
+@app.route('/notifi/user', methods=['GET','POST'])#유저페이지
 def userpage():
     if request.method == 'POST':
         return 0
     else:
         return render_template('user_page.html')
 
-@app.route('/user/notifi', methods=['GET','POST'])#유저공지페이지
+@app.route('/notifi/user/notifi', methods=['GET','POST'])#유저공지페이지
 def user_notifi():
     if request.method == 'POST':
         input_json = request.get_json()#ajax input json data
@@ -480,14 +556,14 @@ def user_notifi():
         # else:
             # return redirect(url_for('login'))
 
-@app.route('/user/setting', methods=['GET','POST'])#유저세팅페이지
+@app.route('/notifi/user/setting', methods=['GET','POST'])#유저세팅페이지
 def user_setting():
     if request.method == 'POST':
         return 0
     else:
         return render_template('user_setting.html')
 
-@app.route('/log/login', methods=['POST'])#로그인 로깅
+@app.route('/notifi/log/login', methods=['POST'])#로그인 로깅
 def login_log():
     return 0
 
