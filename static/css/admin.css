@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
+* {
+    font-family: 'Gowun Dodum', sans-serif;
+    padding: 0;
+    margin: 0;
+}
+.title {
+    color: black;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    font-size: 30px;
+    text-align: center;
+    height: 70px;
+    line-height: 70px;
+    border: 1px solid white;
+    border-radius: 20px;
+    background-color: white;
+}
+#id  {
+    width: 260px;
+    margin-left: 10px;
+}
+#pw {
+    width: 250px;
+    margin-left: 10px;
+}
+#submit {
+    width: 330px;
+}
+.adminbox_input {
+    width: 500px;
+}
+.subtitle_1 {
+    text-align: center;
+    margin: 10px;
+    border: 1.5px solid #ffffff;
+    border-radius: 10px;
+}
+.admin_account_gen_title {
+    margin: 10px;
+    margin-top: 20px;
+}

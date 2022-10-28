@@ -16,15 +16,7 @@
                 location.replace("/login");
             }
     </script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
-        * {
-            font-family: 'Gowun Dodum', sans-serif;
-        }
-        .con {
-            text-align: center;;
-        }
-    </style>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/user_page.css')}}">
 </head>
 <body>
     <div class="container" id="all">
@@ -50,15 +42,15 @@
         });
 
         $("#user_notifi_btn").click(function() {
-            location.href = "/user/notifi";
+            location.href = "/notifi/user/notifi";
         });
 
         $("#user_setting_btn").click(function() {
-            location.href = "/user/setting";
+            location.href = "/notifi/user/setting";
         });
 
         $("#logout").click(function() {
-            location.href = "/logout";
+            location.href = "/notifi/logout";
         });
     </script>
 </body>

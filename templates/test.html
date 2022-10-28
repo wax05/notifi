@@ -15,11 +15,18 @@
     <input type ="datetime-local" name="time" class="time" id="time">
     <input type ="submit" id="btn">
     <script>
-        $("#time").click(function() {
-            var x = document.getElementById("time").value;
-            console.log(x);
-            alert(x);
-        });   
+        $.ajax({
+        type: 'GET',
+        url: '/api/geb/20221027',
+        dataType : 'JSON',
+        contentType: "application/json",
+            success: function(data){
+                console.log(data)
+            },
+            error: function(request, status, error){
+                consoel.log('fail')
+            }
+        });
     </script>
 </body>
 </html>

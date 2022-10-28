@@ -1,0 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
+        * {
+            font-family: 'Gowun Dodum', sans-serif;
+        }
+        .con {
+            text-align: center;;
+        }
+        .btn {
+            width: 450px;
+            height: 380px;
+            border: black solid 0.5px;
+            border-radius: 5px;
+        }

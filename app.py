@@ -381,11 +381,12 @@ def get_school_time(ATPT_OFCDC_SC_CODE:str,school_code:int,grade:int,class_:int,
 
 #----------------------------------------------------------------function end
 #----------------------------------------------------------------flask
-app = Flask(__name__)
-CORS(app)
+app = Flask(__name__)#메인
+cors_accept = app#cors 허용
+CORS(cors_accept)
 app.secret_key = secret_key
 
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
 @app.route('/')
 def main():
@@ -395,17 +396,17 @@ def main():
 def docs_page():
     return render_template('docs.html')
 
-@app.route('/api/geb/<date>')
+@cors_accept.route('/api/geb/<date>')
 def geb_api(date:int):
     data = get_geb_info(date)
     return jsonify(data)
     
-@app.route('/api/schinfo/<name>')
+@cors_accept.route('/api/schinfo/<name>')
 def schoolinfo_api(name:str):
     data = get_school_info(name)
     return jsonify(data)
 
-@app.route('/api/time/<grade>/<class_>/<date>')
+@cors_accept.route('/api/time/<grade>/<class_>/<date>')
 def time_api(grade:int, class_:int, date:int):
     data = get_school_time('J10',7531374,grade,class_,date)
     return jsonify(data)
@@ -516,14 +517,9 @@ def create_account():
     MakeAdminAccount(id, pw)
     return 'done'
 
-@app.route('/notifi/PostTest', methods=['GET','POST'])#post 테스트용
+@app.route('/test')#테스트용
 def post():
-    if request.method == 'POST':
-        input_data = request.get_json()
-        print(input_data)
-        return jsonify(sta = True)
-    else:
-        return render_template('test.html')
+    return render_template('test.html')
 
 @app.route('/notifi/admin')#admin_page
 def admin_page():
