@@ -1,5 +1,5 @@
 # 서버
-<a href="wax05">서버
+[서버](http://wax05.xyz)
 
 # sql
 sql폴더에 dev.sql이 개발중인 sql임. MariaDB + HeidiSQL 로 작업함
