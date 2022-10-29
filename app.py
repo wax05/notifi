@@ -9,7 +9,7 @@ from email.mime.multipart import MIMEMultipart # 메일의 Data 영역의 메시
 from email.mime.text import MIMEText # 메일의 본문 내용을 만드는 모듈
 from hashlib import sha256
 import requests
-from flask import Flask, render_template, request, redirect, session, url_for, jsonify
+from flask import Flask, render_template, request, redirect, session, url_for, jsonify, make_response
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from markupsafe import escape
@@ -104,16 +104,16 @@ def Db_Export_Data_YouWant_DICT_indict(TableName:str,Column:str,Value:str,key_na
     except:
         return 'error'
 
-def Db_Input_UserData(UserName:str,UserId:str,PwHash:str,Class_:str,Permision:str,)->str:
+def Db_Input_UserData(UserName:str,UserId:str,PwHash:str,Class_:str,Permision:str,Email:str)->bool:
     """`UserName`,`UserId`,`PwHash`,`Class_`,`Permision`
     \n\t db-user_data 데이터 추가"""
     try:
-        input_data = """insert into user_data(user_name, user_id, pw_hash, class, permision,auto_login) values(%s,%s,%s,%s,%s,0)"""
-        curs.execute(input_data, (f'{UserName}',f'{UserId}',f'{PwHash}',f'{Class_}',f'{Permision}'))
+        input_data = """insert into user_data(user_name, user_id, pw_hash, class, permision, email,auto_login) values(%s,%s,%s,%s,%s,%s,0)"""
+        curs.execute(input_data, (f'{UserName}',f'{UserId}',f'{PwHash}',f'{Class_}',f'{Permision}',f'{Email}'))
         conn.commit()
-        return 'done'
+        return True
     except:
-        return 'error'
+        return False
 
 def Delete_Data(TableName:str,Column:str,Value:str)->str:
     """`TableName`내에있는 `Column`에서 `Value`인 값만 삭제하는 함수"""
@@ -125,16 +125,6 @@ def Delete_Data(TableName:str,Column:str,Value:str)->str:
     except:
         return 'error'
 
-def MakeAdminAccount(username:str, password:str)->dict:
-    """어드민용 계정 생성"""
-    try:
-        pw_hash = pw_to_hash(password)
-        Db_Input_UserData(username, username, pw_hash, 'admin', 'admin')
-        return_dict = {'id':username, 'password':password}
-        return return_dict
-    except:
-        return 'error'
-
 def DeleteUserAccount(userid):
     """userid를 이용해 데이터를 삭제"""
     try:
@@ -142,7 +132,6 @@ def DeleteUserAccount(userid):
         return 'done'
     except:
         return 'error'
-
 
 def check_password(id:str,password:str)->bool:
     """`id`와`password`의 해쉬를 이용해 db에서 유저 정보를 체크하는 함수\n
@@ -174,15 +163,6 @@ def code_check(code:str)->bool:
                 return False
             else:
                 return True
-    except:
-        return 'error'
-        
-def email(userid:str,email:str,code:str)->bool:
-    try:
-        input_data = """insert into user_email(user_id, user_email, code) values(%s,%s,%s)"""
-        curs.execute(input_data, (f'{userid}',f'{email}',f'{code}'))
-        conn.commit()
-        return True
     except:
         return 'error'
 
@@ -224,6 +204,19 @@ def notifi_log(userid:str,title:str,content:str)->bool:
         return True
     except:
         return False
+
+def id_overlap_check(user_id:str)->bool:#id 중복체크
+    try:
+        data = Db_Export_Data_DICT('user_data')
+        if data != 'error':
+            for i in data:
+                if user_id == (i['user_id']):
+                    return True
+        else:
+            return 'error'
+        return False
+    except:
+        return 'error'
 #----------------------------------------------------------------sql end,secrets start
 def url_gen(len:int)->str:
     """url `len` 자리만들어줌"""
@@ -438,31 +431,33 @@ def logout():
     session.pop('id', None)
     return redirect('/')
 
-@app.route('/notifi/account', methods=['GET','POST'])#계정생성 !!개발중!!
+@app.route('/notifi/account', methods=['GET','POST'])#계정생성
 def account():
     if request.method == 'POST':
         input_data = request.get_json()#ajax로 들어온 데이터
+        print(input_data)
         code = input_data['code']
         if code_check(code) == True:
             name = input_data['name']
             id = input_data['id']
             pw = pw_to_hash(input_data['pw'])
             input_email = input_data['email']
-            if code_update(code) == True:
-                code = make_code(5)
-                Db_Input_UserData(name,id,pw,'user','user')
-                email(id,input_email,code)
-                session['email'] = input_email
-                send_check_email(input_email,code)
-                return jsonify(sta=True)
+            if id_overlap_check(id) == False:
+                if code_update(code) == True:
+                    if Db_Input_UserData(name,id,pw,'user','user',input_email) == True:
+                        return jsonify(sta=True)
+                    else:
+                        return jsonify(sta=False, why='SQL ERROR')
+                else:
+                    return jsonify(sta=False, why='code not match')
             else:
-                return jsonify(sta=False)
+                return jsonify(sta=False, why='id_overlap')
         else:
             return jsonify(sta=False)
     else:
         return render_template('account.html')
 
-@app.route('/notifi/account/email', methods=['GET','POST'])#이메일 확인
+@app.route('/notifi/account/email', methods=['GET','POST'])#이메일 확인 !!안씀!!
 def email_check():
     if request.method == 'POST':
         db_exp_data = Db_Export_Data_YouWant_DICT('user_email','user_id',)
@@ -478,7 +473,7 @@ def email_check():
     else:
         return render_template('email.html')
 
-@app.route('/notifi/invite/<invite_code>', methods=['GET','POST'])
+@app.route('/notifi/invite/<invite_code>', methods=['GET','POST'])#초대페이지
 def group_code_invite(invite_code):
     if request.method == 'POST':
         return 0
@@ -563,16 +558,16 @@ def user_setting():
 def login_log():
     return 0
 
-@app.errorhandler(404)
+@app.errorhandler(404)#404에러페이지
 def error_404(error):
     return render_template('error_404.html'), 404
 
-@app.errorhandler(405)
+@app.errorhandler(405)#405에러페이지
 def error(error):
     return render_template('error.html',error = error), 405
 
-if __name__ == '__main__':
+if __name__ == '__main__':#서버 시작
       app.run(host='127.0.0.1', port=5000, debug=True)
 
-if __name__ == '__main__':
+if __name__ == '__main__':#socketIO 시작
     SocketIO.run(app, debug=True)

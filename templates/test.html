@@ -10,23 +10,10 @@
     <script src="https://code.jquery.com/jquery-latest.min.js"></script>
     <script src="https://kit.fontawesome.com/4f26a61ef8.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+    <script src="{{url_for('static', filename='js/test.js')}}"></script>
 </head>
 <body>
     <input type ="datetime-local" name="time" class="time" id="time">
     <input type ="submit" id="btn">
-    <script>
-        $.ajax({
-        type: 'GET',
-        url: '/api/geb/20221027',
-        dataType : 'JSON',
-        contentType: "application/json",
-            success: function(data){
-                console.log(data)
-            },
-            error: function(request, status, error){
-                consoel.log('fail')
-            }
-        });
-    </script>
 </body>
 </html>

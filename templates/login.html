@@ -7,6 +7,7 @@
   <script src="https://code.jquery.com/jquery-latest.min.js"></script>
   <script src="https://kit.fontawesome.com/4f26a61ef8.js" crossorigin="anonymous"></script>
   <script type="text/javascript" src="http:code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="{{url_for('static', filename='js/login.js')}}"></script>
   <link rel="stylesheet" href="{{url_for('static', filename='css/login.css')}}">
 </head>
 <body>
@@ -30,59 +31,5 @@
     </div><!--create-account-wrap-->
   </div><!--login-form-wrap-->
   <!-- partial -->
-  <script>
-    //id, pw string
-    function login(id,pw) { //ajax post
-      var postdata = {
-          'id':id, 'password':pw
-      }
-      $.ajax({
-          type: 'POST',
-          url: '/notifi/login',
-          data: JSON.stringify(postdata),
-          dataType : 'JSON',
-          contentType: "application/json",
-          success: function(data){
-            var login = data.login;
-            var id_ture = data.id;
-            console.log(login);
-            if (login == true) {
-              location.replace('/notifi/user');
-            } if (login == false) {
-              if (id_ture == true) {
-              alert('비밀번호가 맞지않습니다');
-              } else{
-              alert("아이디가 맞지 않습니다")
-              }
-            }
-          },
-          error: function(request, status, error){
-            alert('에러가 발생했습니다')
-          }
-      });
-    };
-
-    function get_user_data() {
-      var id = $('#user_id').val();
-      var password = $('#password').val();
-      var postdata = {
-          'id':id, 'password':password
-      }
-      return postdata;
-    };
-
-    $(".user_input").keydown(function(e) {
-            if (e.keyCode == 13) {
-              var return_data = get_user_data();
-              login(return_data.id,return_data.password);
-            }
-        });
-
-    //로그인 버튼 누를때
-    $('#login').click(function(){
-      var return_data = get_user_data();
-      login(return_data.id,return_data.password);
-    });
-  </script>
 </body>
 </html>

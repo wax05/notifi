@@ -29,9 +29,10 @@ CREATE TABLE IF NOT EXISTS `code` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- 테이블 데이터 saesol-api.code:~2 rows (대략적) 내보내기
+DELETE FROM `code`;
 INSERT INTO `code` (`code`, `used`, `user_id`, `limit`, `group`) VALUES
 	('abcde', 0, 'admin', 100, 'saesol'),
-	('12345', 0, 'user1', 10, 'saesol');
+	('12345', 1, 'user1', 10, 'saesol');
 
 -- 테이블 saesol-api.group_log 구조 내보내기
 CREATE TABLE IF NOT EXISTS `group_log` (
@@ -41,6 +42,7 @@ CREATE TABLE IF NOT EXISTS `group_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- 테이블 데이터 saesol-api.group_log:~0 rows (대략적) 내보내기
+DELETE FROM `group_log`;
 
 -- 테이블 saesol-api.img 구조 내보내기
 CREATE TABLE IF NOT EXISTS `img` (
@@ -49,6 +51,7 @@ CREATE TABLE IF NOT EXISTS `img` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- 테이블 데이터 saesol-api.img:~1 rows (대략적) 내보내기
+DELETE FROM `img`;
 INSERT INTO `img` (`group_name`, `img_file`) VALUES
 	('saesol', '	https://saesol.hs.kr/hosts/saesol/doc/image/1012/1012..1589520368.png');
 
@@ -63,6 +66,7 @@ CREATE TABLE IF NOT EXISTS `invite_group` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- 테이블 데이터 saesol-api.invite_group:~0 rows (대략적) 내보내기
+DELETE FROM `invite_group`;
 INSERT INTO `invite_group` (`user_id`, `invite_code`, `group_name`, `used`, `how_many`, `invite_type`) VALUES
 	('admin', 'aaaaa', NULL, 0, 10, 'user');
 
@@ -75,6 +79,7 @@ CREATE TABLE IF NOT EXISTS `log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- 테이블 데이터 saesol-api.log:~0 rows (대략적) 내보내기
+DELETE FROM `log`;
 INSERT INTO `log` (`user_id`, `notifi_title`, `notifi_content`, `upload_time`) VALUES
 	('admin', 'test1', 'test1', '2022-09-07 13:26:40');
 
@@ -88,6 +93,7 @@ CREATE TABLE IF NOT EXISTS `one_used_account` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- 테이블 데이터 saesol-api.one_used_account:~0 rows (대략적) 내보내기
+DELETE FROM `one_used_account`;
 
 -- 테이블 saesol-api.user_data 구조 내보내기
 CREATE TABLE IF NOT EXISTS `user_data` (
@@ -95,28 +101,19 @@ CREATE TABLE IF NOT EXISTS `user_data` (
   `user_id` varchar(13) DEFAULT NULL,
   `pw_hash` varchar(64) DEFAULT NULL,
   `class` varchar(10) DEFAULT NULL,
+  `email` varchar(30) DEFAULT NULL,
   `permision` varchar(50) DEFAULT NULL,
   `auto_login` tinyint(4) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='input_user data';
 
--- 테이블 데이터 saesol-api.user_data:~2 rows (대략적) 내보내기
-INSERT INTO `user_data` (`user_name`, `user_id`, `pw_hash`, `class`, `permision`, `auto_login`) VALUES
-	('admin', 'admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'admin', 'admin', 0),
-	('일반적인유저', 'user1', '0a041b9462caa4a31bac3567e0b6e6fd9100787db2ab433d96f6d178cabfce90', 'user', 'user', 0);
-
--- 테이블 saesol-api.user_email 구조 내보내기
-CREATE TABLE IF NOT EXISTS `user_email` (
-  `user_id` varchar(13) DEFAULT NULL,
-  `user_email` varchar(40) DEFAULT NULL,
-  `confirm` tinyint(4) DEFAULT 0,
-  `confirm_date` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
-
--- 테이블 데이터 saesol-api.user_email:~3 rows (대략적) 내보내기
-INSERT INTO `user_email` (`user_id`, `user_email`, `confirm`, `confirm_date`) VALUES
-	('test1', 'test1@example.com', 0, NULL),
-	('test2', 'test2@example.com', 1, '2022-10-06 20:36:41'),
-	('user1', 'user1@example.com', 0, NULL);
+-- 테이블 데이터 saesol-api.user_data:~1 rows (대략적) 내보내기
+DELETE FROM `user_data`;
+INSERT INTO `user_data` (`user_name`, `user_id`, `pw_hash`, `class`, `email`, `permision`, `auto_login`) VALUES
+	('admin', 'admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'admin', NULL, 'admin', 0),
+	('일반적인유저', 'user1', '0a041b9462caa4a31bac3567e0b6e6fd9100787db2ab433d96f6d178cabfce90', 'user', NULL, 'user', 0),
+	('a', 'a', 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb', 'user', NULL, 'user', 0),
+	('t2', 't2', 'c44474038d459e40e4714afefa7bf8dae9f9834b22f5e8ec1dd434ecb62b512e', 'user', NULL, 'user', 0),
+	('t1', 't1', 'ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb', 'user', 'a@a', 'user', 0);
 
 -- 테이블 saesol-api.user_group 구조 내보내기
 CREATE TABLE IF NOT EXISTS `user_group` (
@@ -127,9 +124,9 @@ CREATE TABLE IF NOT EXISTS `user_group` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- 테이블 데이터 saesol-api.user_group:~1 rows (대략적) 내보내기
+DELETE FROM `user_group`;
 INSERT INTO `user_group` (`admin`, `user`, `group_name`, `school_name`) VALUES
-	('/admin', '/user1/user2', 'saesol', '새솔고등학교'),
-	('/aaa123', '/a123/a234/a345', 'choji', '초지고등학교');
+	('/admin', '/user1/user2', 'saesol', '새솔고등학교');
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

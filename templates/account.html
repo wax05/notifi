@@ -7,6 +7,7 @@
     <title>계정만들기</title>
     <!--cdn import-->
     <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="{{url_for('static', filename='js/account.js')}}"></script>
     <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
     <link rel="stylesheet" href="{{url_for('static', filename='css/account.css')}}">
 </head>
@@ -31,7 +32,7 @@
                 <input type="password" id="pw_check" class="input"  name="pw"placeholder="비밀번호를 다시 입력해주세요" required>
             </label>
             <label for="ID">
-                이메일 입력 (인증을 위해 필요합니다)
+                이메일 입력 (비밀번호 찾기를 위해 필요합니다)
                 <input type="email" class="input"  name="code" id="email"placeholder="user_email" required>
             </label>
             <label for="ID">
@@ -42,48 +43,5 @@
         </div>
         <div class="img_tag"></div>
     </div>
-
-    <script>
-        $("#submit").click(function(){
-            var name = $("#user_name").val();
-            var id = $("#user_id").val();
-            var pw = $("#pw_input").val();
-            var pw_check = $("#pw_check").val();
-            var email = $("#email").val();
-            var code = $("#code").val();
-            if (pw == pw_check) {
-                postdata = {//send data to server
-                    'name':name,
-                    'id':id,
-                    'pw':pw,
-                    'email':email,
-                    'code':code
-                }
-                $.ajax({
-                    type: 'POST',
-                    url: '/account',
-                    data: JSON.stringify(postdata),
-                    dataType : 'JSON',
-                    contentType: "application/json",
-                    success: function(data){
-                        var res = data.sta;
-                        if (res == true) {
-                            alert('회원가입이 정상적으로 처리되었습니다')
-                            location.replace('/account/email');
-                        } else {
-                            alert('코드가 틀렸습니다')
-                        }
-                    },
-                    error: function(request, status, error){
-                        alert('에러가 발생했습니다')
-                    }
-                });
-            } else {
-                var pw = $("#pw_input").val('');
-                var pw_check = $("#pw_check").val('');//틀리면 값 null로 바꿈
-            }
-            console.log(postdata);
-        });
-    </script>
 </body>
 </html>
