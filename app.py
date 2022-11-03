@@ -217,6 +217,46 @@ def id_overlap_check(user_id:str)->bool:#id 중복체크
         return False
     except:
         return 'error'
+
+def db_pw_update(user_id:str,pw:str)->bool:
+    try:
+        edit_data = """UPDATE user_data SET pw_hash=%s WHERE user_id=%s"""
+        curs.execute(edit_data,(pw_to_hash(pw),user_id))
+        curs.commit()
+        return True
+    except:
+        return False
+
+def reset_pw(user_id:str,code:str)->bool:
+    try:
+        db_data = Db_Export_Data_DICT('reset_pw')
+        user_db_id = []
+        user_db_code = []
+        for i in db_data:
+            user_db_id.append(i['user_id'])
+            user_db_id.append(i['code'])
+        if user_id in user_db_id:
+            if code in user_db_code:
+                
+        return True
+    except:
+        return 'error'
+
+def id_check(user_id:str)->bool:
+    try:    
+        data = Db_Export_Data_DICT('user_data')
+        user_id_db = []
+        for i in data:
+            user_id_db.append(i['user_id'])
+        if user_id in user_id_db:
+            return True
+        else:
+            return False
+        return False
+    except:
+        return 'error'
+
+
 #----------------------------------------------------------------sql end,secrets start
 def url_gen(len:int)->str:
     """url `len` 자리만들어줌"""
@@ -308,7 +348,35 @@ def send_check_email(email_to:str,code:str)->bool:
         msg["To"] = email_mail
 
         # 메일 내용 쓰기
-        content = f"""<html><head></head><body><h1>인증코드는 {code} 입니다</h1><a href="wax05/email/notme">만약 당신이 요청한것이 아니라면 클릭해주세요</a></body></html>"""
+        content = f"""<html><head></head><body><h1>인증코드는 {code} 입니다</h1><a href="wax05.xyz/email/notme">만약 당신이 요청한것이 아니라면 클릭해주세요</a></body></html>"""
+        common = '만약 이 인증을 요청하신적이 없으시면 위 버튼을 눌러주시기 바랍니다'
+        content_part = MIMEText(content, 'html')
+        common_part = MIMEText(common, 'plain')
+        msg.attach(content_part)
+        msg.attach(common_part)
+        # 메일 보내고 서버 끄기
+        smpt.sendmail(email_mail, email_to, msg.as_string())  
+        smpt.quit()
+        return True
+    except:
+        return False
+
+def send_reset_email(email_to:str)->bool:
+    try:
+        # smpt 서버와 연결
+        gmail_smtp = "smtp.gmail.com"  #gmail smtp 주소
+        gmail_port = 465  #gmail smtp 포트번호
+        smpt = smtplib.SMTP_SSL(gmail_smtp, gmail_port)
+        # 로그인
+        smpt.login(email_mail,email_pw)
+        # 메일 기본 정보 설정
+        msg = MIMEMultipart()
+        msg["Subject"] = "인증요청"
+        msg["From"] = "saesol-api"
+        msg["To"] = email_mail
+
+        # 메일 내용 쓰기
+        content = f"""<html><head></head><body><h1>인증코드는 {make_code(5)} 입니다</h1><a href="wax05.xyz/notme">만약 당신이 요청한것이 아니라면 클릭해주세요</a></body></html>"""
         common = '만약 이 인증을 요청하신적이 없으시면 위 버튼을 눌러주시기 바랍니다'
         content_part = MIMEText(content, 'html')
         common_part = MIMEText(common, 'plain')
@@ -456,6 +524,33 @@ def account():
             return jsonify(sta=False)
     else:
         return render_template('account.html')
+
+@app.route('/notifi/search', methods=['GET'])
+def search_account():
+    return render_template('search.html')
+
+@app.route('/notifi/search/id', methods=['GET','POST'])
+def find_id():
+    if request.method == 'GET':
+        return render_template('id_find.html')
+    else:
+        return jsonify(send=True)
+
+@app.route('/notifi/search/pw', methods=['GET','POST'])
+def find_pw():
+    if request.method == 'GET':
+        return render_template('pw_find.html')
+    else:
+        data = request.get_json()
+        print(data)
+        id = data['id']
+        if id_check(id) == True:
+            db_exp = Db_Export_Data_YouWant_DICT('user_data','user_id',id)
+            for i in db_exp:
+                global user_email
+                user_email = i['email']
+            send_reset_email(user_email)
+        return jsonify(send=True)
 
 @app.route('/notifi/account/email', methods=['GET','POST'])#이메일 확인 !!안씀!!
 def email_check():

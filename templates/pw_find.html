@@ -1,25 +1,34 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <!--cdn import-->
     <script src="https://code.jquery.com/jquery-latest.min.js"></script>
-    <script src="https://kit.fontawesome.com/4f26a61ef8.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
-    <!-- <script src="{{url_for('static', filename='js/test.js')}}"></script> -->
+    <title>ID찾기</title>
 </head>
 <body>
-    <input type ="datetime-local" name="time" class="time" id="time">
-    <input type ="submit" id="btn">
+    <div class="con">
+        <div class="title">
+            ID찾기
+        </div>
+        <div class="input_box">
+            아이디를 입력해주세요<br>
+            <input type="input" id="id" placeholder="ID를 입력해주세요"><br>
+            <input type="submit" id="confirm" value="확인">
+        </div>
+        <div id="status">
+        </div>
+    </div>
     <script>
-        var postdata = {'user':"Hello"}
-        $.ajax({
-                type: 'GET',
-                url: 'http://wax05.xyz/api/time/2/6/20221104',
+        $("#confirm").click(()=>{
+            var id = $("#id").val();
+            const postdata = {
+              "id":id  
+            };
+            $.ajax({
+                type: 'POST',
+                url: '/notifi/search/pw',
                 data: JSON.stringify(postdata),
                 dataType : 'JSON',
                 contentType: "application/json",
@@ -30,6 +39,8 @@
                 alert('에러가 발생했습니다')
                 }
             });
+            console.log(id)
+        });
     </script>
 </body>
 </html>

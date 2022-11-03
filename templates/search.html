@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>계정찾기</title>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/search.css')}}">
+    <link rel="stylesheet" href="/static/css/search.css">
+</head>
+<body>
+    <div class="container">
+        <h1 id="title">
+            계정찾기
+        </h1>
+        <div class="inbox">
+            <div class="find_id">
+                <input type="button" id="id_btn" class="btn" value="ID 찾기"> 
+            </div>
+            <div class="find_pw">
+                <input type="button" id="pw_btn" class="btn" value="비밀번호 찾기">
+            </div>
+        </div>
+    </div>
+    <script>
+    $("#id_btn").click(function(){
+        location.href = "./search/id"
+    });
+
+    $("#pw_btn").click(function(){
+        location.href = "./search/pw"
+    });
+    </script>
+</body>
+</html>

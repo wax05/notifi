@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    font-family: 'Gowun Dodum', sans-serif;
+}
+
+.container {
+    margin: 20vh 15vw 0 15vw;
+    width: 70vw;
+    height: 60vh;
+    background-color: aqua;
+    border-radius: 10px;
+    border: solid 1px black;
+}
